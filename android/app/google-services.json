@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "609178679652",
+    "project_id": "myflutter-cb967",
+    "storage_bucket": "myflutter-cb967.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609178679652:android:f5cfaeb7160a24107de271",
+        "android_client_info": {
+          "package_name": "com.example.cartdor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDh4sWVOtTf_aopdVo3qccMC34JjekOQYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

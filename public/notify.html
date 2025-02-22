@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification de Paiement</title>
+    <script>
+        // Fonction qui est exécutée lorsque la page reçoit des données de notification
+        function handlePaymentNotification() {
+            // Récupérer les données envoyées par la plateforme de paiement
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            //const paymentStatus = urlParams.get('payment_status'); // Statut du paiement
+            const transactionId = urlParams.get('transaction_id'); // ID de la transaction
+            const amount = urlParams.get('amount'); // Montant du paiement
+            const currency = urlParams.get('currency'); // Monnaie utilisée
+
+            // Vérifier si le paiement a été effectué avec succès
+            if (paymentStatus === "Completed") {
+               // document.getElementById('status').innerText = "Votre paiement a été effectué avec succès !";
+                document.getElementById('transactionDetails').innerText = `ID de la transaction : ${transactionId}\nMontant : ${amount} ${currency}`;
+                // Ajouter d'autres actions comme l'update dans la base de données si nécessaire
+            } else {
+               // document.getElementById('status').innerText = "Le paiement a échoué ou a été refusé.";
+                document.getElementById('transactionDetails').innerText = `ID de la transaction : ${transactionId}\nMontant : ${amount} ${currency}`;
+            }
+        }
+        
+        // Lancer la gestion de la notification lorsque la page est chargée
+        window.onload = handlePaymentNotification;
+    </script>
+</head>
+<body>
+    <h1>Notification de Paiement</h1>
+    <div id="status" style="font-size: 20px; color: green;"></div>
+    <div id="transactionDetails" style="font-size: 16px; color: gray;"></div>
+</body>
+</html>

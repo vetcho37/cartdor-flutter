@@ -1,0 +1,336 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui; // Importation nécessaire pour ImageByteFormat
+
+import 'package:cinetpay/cinetpay.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>(); // GlobalKey for form validation
+  String? qrData;
+  String? subscriberCode;
+  bool showQR = false;
+  bool showMessage = false;
+
+  String? message;
+  Color? color;
+  IconData? icon;
+  String? qrImagePath;
+
+  // Validation du téléphone
+  String? validatePhone(String phone) {
+    String phonePattern = r'^\+?[1-9]\d{1,14}$'; // Format international
+    RegExp regExp = RegExp(phonePattern);
+    if (regExp.hasMatch(phone)) {
+      return null;
+    } else {
+      return "Veuillez entrer un numéro de téléphone valide";
+    }
+  }
+
+  Future<void> processPayment({bool isRenewal = false}) async {
+    String name = nameController.text.trim();
+    String phone = phoneController.text.trim();
+    String email = emailController.text.trim();
+    int amount = 100;
+
+    if (name.isEmpty || phone.length < 10 || email.isEmpty) {
+      setState(() {
+        message = 'Veuillez remplir tous les champs correctement.';
+        icon = Icons.warning_rounded;
+        color = Colors.yellowAccent;
+        showMessage = true;
+      });
+      return;
+    }
+
+    String transactionId = Random().nextInt(100000000).toString();
+    String uniqueCode =
+        isRenewal ? subscriberCode! : "CD${Random().nextInt(999999)}";
+    DateTime expirationDate = DateTime.now().add(const Duration(days: 30));
+
+    await Get.to(CinetPayCheckout(
+      title: 'Processus de Paiement',
+      configData: {
+        'apikey': '1536910383678539018fd155.59185723',
+        'site_id': int.parse("105885554"),
+        'notify_url': 'https://flutter-app-e9719.web.app/notify',
+      },
+      paymentData: {
+        'transaction_id': transactionId,
+        'amount': amount,
+        'currency': 'XOF',
+        'channels': 'ALL',
+        'description': isRenewal
+            ? 'Renouvellement abonnement CartDor'
+            : 'Paiement abonnement CartDor',
+      },
+      waitResponse: (data) async {
+        if (data['status'] == 'ACCEPTED') {
+          // Payment successful, add subscription to Firestore
+          await FirebaseFirestore.instance.collection('subscriptions').add({
+            'name': name,
+            'phone': phone,
+            'emailclit': email,
+            'amount': amount,
+            'uniqueCode': uniqueCode,
+            'creationDate': DateTime.now(),
+            'expirationDate': expirationDate,
+            'status': 'Actif'
+          });
+
+          // Show QR code and success message
+          setState(() {
+            qrData = uniqueCode;
+            subscriberCode = uniqueCode;
+            showQR = true;
+            message = isRenewal
+                ? 'Renouvellement réussi !'
+                : 'Paiement réussi ! Votre abonnement est activé.';
+            icon = Icons.check_circle;
+            color = Colors.green;
+            showMessage = true;
+          });
+
+          await _generateQrCode(uniqueCode); // Generate QR Code after payment
+        } else {
+          setState(() {
+            message = 'Échec du paiement. Vérifiez votre solde.';
+            icon = Icons.warning_rounded;
+            color = Colors.redAccent;
+            showMessage = true;
+          });
+        }
+        Get.back();
+      },
+      onError: (data) {
+        setState(() {
+          message = 'Une erreur est survenue lors du paiement.';
+          icon = Icons.warning_rounded;
+          color = Colors.yellowAccent;
+          showMessage = true;
+          Get.back();
+        });
+      },
+    ));
+  }
+
+  Future<void> _generateQrCode(String code) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final qrFile = File('${directory.path}/qr_code.png');
+    final qrImage = await QrPainter(
+      data: code,
+      version: QrVersions.auto,
+      gapless: false,
+    ).toImage(200);
+    final byteData = await qrImage.toByteData(format: ui.ImageByteFormat.png);
+    await qrFile.writeAsBytes(byteData!.buffer.asUint8List());
+    setState(() {
+      qrImagePath = qrFile.path;
+    });
+  }
+
+  // Save QR code to gallery
+  Future<void> _saveQrCodeToGallery() async {
+    if (qrImagePath != null) {
+      try {
+        final success = await GallerySaver.saveImage(qrImagePath!);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success != null && success
+                  ? "QR Code enregistré dans la galerie !"
+                  : "Erreur lors de l'enregistrement.",
+            ),
+          ),
+        );
+      } catch (e) {
+        print("Erreur lors de l'enregistrement : $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Erreur lors de l'enregistrement du QR Code.")),
+        );
+      }
+    }
+  }
+
+  // Function to check if subscription has expired
+  Future<void> _checkSubscriptionExpiration() async {
+    final currentDate = DateTime.now();
+    final subscriptionsCollection =
+        FirebaseFirestore.instance.collection('subscriptions');
+    final subscriptionsSnapshot = await subscriptionsCollection.get();
+
+    for (var doc in subscriptionsSnapshot.docs) {
+      DateTime expirationDate =
+          (doc['expirationDate'] as Timestamp).toDate();
+
+      if (expirationDate.isBefore(currentDate)) {
+        // Update the status to "Expiré"
+        await subscriptionsCollection.doc(doc.id).update({
+          'status': 'Expiré',
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkSubscriptionExpiration(); // Check subscription status on app start
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
+      title: 'CinetPay & QR Code',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  if (showMessage)
+                    Column(
+                      children: [
+                        Icon(icon ?? Icons.info,
+                            color: color ?? Colors.black, size: 80),
+                        const SizedBox(height: 10),
+                        Text(message ?? '',
+                            style: const TextStyle(fontSize: 18)),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  const Text(
+                    "Abonnement CartDor",
+                    style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue),
+                  ),
+                  const SizedBox(height: 30),
+                  Form(
+                    key: _formKey, // Form with the global key
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: nameController,
+                          decoration: const InputDecoration(
+                              labelText: "Nom Abonné",
+                              border: OutlineInputBorder()),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Le nom est requis';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 15),
+                        // Téléphone
+                        TextFormField(
+                          controller: phoneController,
+                          decoration: InputDecoration(
+                            labelText: "Téléphone",
+                            hintText: "+XX XXXXXXXXX",
+                          ),
+                          keyboardType: TextInputType.phone,
+                          validator: (value) => validatePhone(value ?? ''),
+                        ),
+                        const SizedBox(height: 15),
+                        TextFormField(
+                          controller: emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: const InputDecoration(
+                              labelText: "Email",
+                              border: OutlineInputBorder()),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'L\'email est requis';
+                            }
+                            if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                .hasMatch(value)) {
+                              return 'Entrez un email valide';
+                            }
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              processPayment();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size(double.infinity, 50),
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: const Text(
+                            "Continuer",
+                            style:
+                                TextStyle(fontSize: 18, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (showQR) ...[
+                    Column(
+                      children: [
+                        Text("Votre Code Abonné: $subscriberCode",
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold)),
+                        QrImageView(
+                            data: qrData!,
+                            size: 200,
+                            backgroundColor: Colors.white),
+                      ],
+                    ),
+                    ElevatedButton(
+                        onPressed: _saveQrCodeToGallery,
+                        child: const Text("Enregistrer le QR Code")),
+                  ]
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
