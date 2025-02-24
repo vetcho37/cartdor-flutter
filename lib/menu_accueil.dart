@@ -30,10 +30,44 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
     transactionsFuture = getTransactionsByEmail(widget.userEmail);
   }
 
+  // Fonction pour gérer la déconnexion
+  Future<void> _signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      // Après déconnexion, rediriger vers la page de connexion
+      // Remplacez 'LoginPage()' par le nom de votre page de connexion
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de la déconnexion: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50], // Couleur de fond
+
+      // Ajout de l'AppBar avec le bouton de déconnexion
+      appBar: AppBar(
+        title: Text(
+          '',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.blue,
+        automaticallyImplyLeading: false, // Supprime la flèche de retour
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app, color: Colors.white),
+            onPressed: () => _showLogoutConfirmationDialog(context),
+            tooltip: 'Déconnexion',
+          ),
+        ],
+      ),
 
       body: Center(
           // Centrer le contenu
@@ -72,7 +106,7 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
 
             return Column(
               children: [
-                SizedBox(height: 40),
+                SizedBox(height: 20),
 
                 // Section des économies réalisées
                 Center(
@@ -300,6 +334,32 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Fonction pour afficher une boîte de dialogue de confirmation avant la déconnexion
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Déconnexion'),
+        content: Text('Êtes-vous sûr de vouloir vous déconnecter?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Fermer la boîte de dialogue
+            },
+            child: Text('Annuler'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Fermer la boîte de dialogue
+              _signOut(context); // Déconnexion
+            },
+            child: Text('Déconnexion'),
+          ),
+        ],
       ),
     );
   }

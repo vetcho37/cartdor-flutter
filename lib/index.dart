@@ -27,6 +27,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+bool _isPasswordVisible = false;
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -119,7 +121,7 @@ class LoginPageState extends State<LoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   // Icône utilisateur au lieu du texte "Cartd'Or"
-                  Icon(
+                  const Icon(
                     Icons.person,
                     size: 100, // Taille de l'icône
                     color: Colors.blue, // Couleur de l'icône
@@ -138,11 +140,23 @@ class LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 16.0),
                   TextField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Mot de passe',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                      ),
                     ),
-                    obscureText: true,
+                    obscureText: !_isPasswordVisible,
                   ),
                   const SizedBox(height: 20.0),
                   // Bouton Connexion
