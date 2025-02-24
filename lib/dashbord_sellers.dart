@@ -55,7 +55,7 @@ class DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.blue[50],
       appBar: AppBar(
         title: Text('Tableau de bord - ${widget.storeName}'),
       ),
@@ -334,8 +334,8 @@ class DashboardPageState extends State<DashboardPage> {
             ),
             _buildMenuItem(
               context,
-              icon: Icons.refresh, // Icône d'accueil
-              title: 'Rafraichir',
+              icon: Icons.dashboard, // Icône d'accueil
+              title: 'historiques',
               onTap: () {
                 // Réinitialiser la page
                 Navigator.pushReplacement(
@@ -413,32 +413,116 @@ class StatisticsPage extends StatefulWidget {
 class StatisticsPageState extends State<StatisticsPage> {
   @override
   Widget build(BuildContext context) {
+    // Référence aux variables du widget à l'intérieur de la méthode build
+    String codeVendeur = widget.codeVendeur;
+
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Tableau de bord'),
-        ),
-        body: Center(
-            // Centre tout le contenu
-            child: SizedBox(
+      appBar: AppBar(
+        title: Text('Tableau de bord'),
+      ),
+      body: Center(
+        child: SizedBox(
           width: 600,
           child: SingleChildScrollView(
             padding: EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildGlobalStatistics(),
+                _buildGlobalStatistics(codeVendeur),
                 SizedBox(height: 20),
-                _buildSubscribersTable(),
+                _buildSubscribersTable(codeVendeur),
                 SizedBox(height: 20),
-                _buildDailyRevenueTable(),
+                _buildDailyRevenueTable(codeVendeur),
               ],
             ),
           ),
-        )));
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMenuItem(
+              context,
+              icon: Icons.dashboard,
+              title: 'Statistiques',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StatisticsPage(
+                        storeName: widget.storeName,
+                        storeLocation: widget.storeLocation,
+                        storePhone: widget.storePhone,
+                        codeVendeur: widget.codeVendeur),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.dashboard,
+              title: 'Historiques',
+              onTap: () {
+                // Rafraîchissement de la page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashboardPage(
+                        storeName: widget.storeName,
+                        storeLocation: widget.storeLocation,
+                        storePhone: widget.storePhone,
+                        codeVendeur: widget.codeVendeur),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.scanner,
+              title: 'Scanner',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ScanQRCodePage(
+                      codeVendeur: widget.codeVendeur,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 28, color: Colors.blue),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 
   // Widget pour afficher les statistiques globales
-  Widget _buildGlobalStatistics() {
+  Widget _buildGlobalStatistics(String codeVendeur) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       elevation: 8,
@@ -457,7 +541,8 @@ class StatisticsPageState extends State<StatisticsPage> {
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('transactions')
-                  .where('codeVendeur', isEqualTo: widget.codeVendeur)
+                  .where('codeVendeur',
+                      isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -537,7 +622,7 @@ class StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  Widget _buildSubscribersTable() {
+  Widget _buildSubscribersTable(String codeVendeur) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       elevation: 8,
@@ -558,7 +643,8 @@ class StatisticsPageState extends State<StatisticsPage> {
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('transactions')
-                  .where('codeVendeur', isEqualTo: widget.codeVendeur)
+                  .where('codeVendeur',
+                      isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -580,12 +666,10 @@ class StatisticsPageState extends State<StatisticsPage> {
 
                   double netCA = initialAmount * 0.90;
 
-                  // Si l'abonné existe déjà dans la carte, on cumule les valeurs
                   if (subscribers.containsKey(subscriberName)) {
                     subscribers[subscriberName]!['transactions'] += 1;
                     subscribers[subscriberName]!['netCA'] += netCA;
                   } else {
-                    // Sinon on ajoute l'abonné à la carte avec les valeurs de la première transaction
                     subscribers[subscriberName] = {
                       'transactions': 1,
                       'netCA': netCA,
@@ -593,7 +677,6 @@ class StatisticsPageState extends State<StatisticsPage> {
                   }
                 }
 
-                // Trier les abonnés par CA net décroissant
                 List<MapEntry<String, Map<String, dynamic>>> sortedSubscribers =
                     subscribers.entries.toList()
                       ..sort((a, b) =>
@@ -631,8 +714,7 @@ class StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  // Widget pour afficher le chiffre d'affaires journalier
-  Widget _buildDailyRevenueTable() {
+  Widget _buildDailyRevenueTable(String codeVendeur) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       elevation: 8,
@@ -642,16 +724,19 @@ class StatisticsPageState extends State<StatisticsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Chiffre d\'Affaires Journalier',
-                style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange)),
+            Text(
+              'Recettes Journalières',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange),
+            ),
             SizedBox(height: 10),
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('transactions')
-                  .where('codeVendeur', isEqualTo: widget.codeVendeur)
+                  .where('codeVendeur',
+                      isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -659,28 +744,10 @@ class StatisticsPageState extends State<StatisticsPage> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('Aucune donnée disponible.'));
+                  return Center(child: Text('Aucune donnée de recettes.'));
                 }
 
-                Map<String, Map<String, dynamic>> dailyRevenue = {};
-
-                snapshot.data!.docs.forEach((doc) {
-                  final data = doc.data() as Map<String, dynamic>;
-                  String date = (data['date'] as Timestamp)
-                      .toDate()
-                      .toLocal()
-                      .toString()
-                      .split(' ')[0];
-                  double netCA = (data['initialAmount'] ?? 0.0) * 0.90;
-
-                  if (!dailyRevenue.containsKey(date)) {
-                    dailyRevenue[date] = {'transactions': 1, 'netCA': netCA};
-                  } else {
-                    dailyRevenue[date]!['transactions'] += 1;
-                    dailyRevenue[date]!['netCA'] += netCA;
-                  }
-                });
-
+                // Code pour afficher les recettes journalières
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: DataTable(
@@ -689,20 +756,19 @@ class StatisticsPageState extends State<StatisticsPage> {
                           label: Text('Date',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                       DataColumn(
-                          label: Text('Transactions',
-                              style: TextStyle(fontWeight: FontWeight.bold))),
-                      DataColumn(
-                          label: Text('CA Net',
+                          label: Text('CA',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                     ],
-                    rows: dailyRevenue.entries.map((entry) {
-                      return DataRow(cells: [
-                        DataCell(Text(entry.key)),
-                        DataCell(Text(entry.value['transactions'].toString())),
-                        DataCell(Text(
-                            entry.value['netCA'].toStringAsFixed(2) + ' FCFA')),
-                      ]);
-                    }).toList(),
+                    rows: [
+                      DataRow(cells: [
+                        DataCell(Text('01/02/2025')),
+                        DataCell(Text('1,200,000 FCFA')),
+                      ]),
+                      DataRow(cells: [
+                        DataCell(Text('02/02/2025')),
+                        DataCell(Text('1,300,000 FCFA')),
+                      ]),
+                    ],
                   ),
                 );
               },

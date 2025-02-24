@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Assurez-vous que cette ligne est présente
+import 'menu_accueil.dart';
+import 'statutabonement.dart';
 
 class DashboardUserPage extends StatefulWidget {
   @override
@@ -100,13 +102,13 @@ class DashboardUserPageState extends State<DashboardUserPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue[50], // Couleur de fond
-        appBar: AppBar(
-          title: Text('Tableau de bord Utilisateur'),
-        ),
-        body: Center(
-            // Centre tout le contenu
-            child: SizedBox(
+      backgroundColor: Colors.blue[50], // Couleur de fond
+      appBar: AppBar(
+        title: Text('Tableau de bord Utilisateur'),
+      ),
+      body: Center(
+        // Centre tout le contenu
+        child: SizedBox(
           width: 500, // Fixe la largeur à 400 pixels
           child: SingleChildScrollView(
             child: Padding(
@@ -313,45 +315,130 @@ class DashboardUserPageState extends State<DashboardUserPage> {
               ),
             ),
           ),
-        )));
-  }
-
-  // Méthode pour afficher une colonne des statistiques
-  Widget _buildStatColumn(IconData icon, String label, double value,
-      {bool isEconomy = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(icon, size: 40, color: isEconomy ? Colors.green : Colors.blue),
-        SizedBox(height: 10),
-        Text(
-          label,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 5),
-        Text(
-          value.toStringAsFixed(0),
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMenuItem(
+              context,
+              icon: Icons.dashboard,
+              title: 'Historiques',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashboardUserPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.home, // Icône d'accueil
+              title: 'Accueil',
+              onTap: () {
+                // Réinitialiser la page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Menu_Accueil(userEmail: userEmail),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.people,
+              title: 'Partenaires',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PartnerListPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.subscriptions,
+              title: 'Abonnez vous',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionStatusScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
-  // Fonction pour formater la date en fonction du type de données
-  String _formatDate(dynamic date) {
-    if (date is Timestamp) {
-      // Si la date est un Timestamp, convertissez-la en DateTime
-      return DateFormat('dd/MM/yyyy').format(date.toDate());
-    } else if (date is String) {
-      // Si la date est une chaîne de caractères, tentez de la convertir en DateTime
-      try {
-        DateTime parsedDate = DateFormat('yyyy-MM-dd').parse(date);
-        return DateFormat('dd/MM/yyyy').format(parsedDate);
-      } catch (e) {
-        return 'Date invalide';
-      }
-    } else {
+  Widget _buildMenuItem(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 28, color: Colors.blue),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Méthode pour afficher une colonne des statistiques
+Widget _buildStatColumn(IconData icon, String label, double value,
+    {bool isEconomy = false}) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Icon(icon, size: 40, color: isEconomy ? Colors.green : Colors.blue),
+      SizedBox(height: 10),
+      Text(
+        label,
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      SizedBox(height: 5),
+      Text(
+        value.toStringAsFixed(0),
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    ],
+  );
+}
+
+// Fonction pour formater la date en fonction du type de données
+String _formatDate(dynamic date) {
+  if (date is Timestamp) {
+    // Si la date est un Timestamp, convertissez-la en DateTime
+    return DateFormat('dd/MM/yyyy').format(date.toDate());
+  } else if (date is String) {
+    // Si la date est une chaîne de caractères, tentez de la convertir en DateTime
+    try {
+      DateTime parsedDate = DateFormat('yyyy-MM-dd').parse(date);
+      return DateFormat('dd/MM/yyyy').format(parsedDate);
+    } catch (e) {
       return 'Date invalide';
     }
+  } else {
+    return 'Date invalide';
   }
 }

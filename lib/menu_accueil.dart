@@ -362,7 +362,10 @@ class TransactionDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Détails de la transaction'),
+        title: Text(
+          'Détails de la transaction',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blue,
       ),
       body: Padding(

@@ -1,4 +1,3 @@
-import 'package:cartdor/splash_screen.dart'; // Correct
 import 'package:cartdor/dashbord_abonne.dart';
 import 'package:cartdor/dashbord_users.dart';
 import 'package:cartdor/menu_accueil.dart';
@@ -18,9 +17,11 @@ import 'subscriptionpage.dart';
 import 'scanqr.dart';
 import 'parteners_register.dart';
 import 'scan_parteners.dart';
+import 'menu_demarage.dart';
+import 'menu_accueil.dart';
 import 'admin_page.dart';
 import 'nbre_abonne_mois.dart';
-import 'dart:io';
+import 'dart:io'; // Pour accéder à Platform.environment
 import 'package:flutter/widgets.dart';
 
 void main() async {
@@ -40,10 +41,12 @@ void main() async {
   );
 
   // Lancement de l'application Flutter
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -51,17 +54,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      debugShowCheckedModeBanner: false,
-      home: SplashScreen(
-        onComplete: () {
-          // Navigation vers votre écran principal
-          // Remplacez par la bonne page après le splash screen
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
-          );
-        },
-      ),
+      debugShowCheckedModeBanner: false, // Supprime le bandeau de débogage
+      home:
+          StartMenu(), // Page d'accueil ou toute autre page que tu veux utiliser comme page principale
     );
   }
 }

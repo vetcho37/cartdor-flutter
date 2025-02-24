@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dashbord_abonne.dart';
+import 'menu_accueil.dart';
+import 'statutabonement.dart';
 
 class PartnerListPage extends StatefulWidget {
   @override
@@ -30,24 +33,23 @@ class _PartnerListPageState extends State<PartnerListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Partenaires",
-            style: TextStyle(
-                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-          backgroundColor: Colors.blue,
-          centerTitle: true,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pop(context); // Retour à la page précédente
-            },
-          ),
+      appBar: AppBar(
+        title: Text(
+          "Partenaires",
+          style: TextStyle(
+              fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        body: Center(
-            // Centre tout le contenu
-            child: SizedBox(
+        backgroundColor: Colors.blue,
+        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context); // Retour à la page précédente
+          },
+        ),
+      ),
+      body: Center(
+        child: SizedBox(
           width: 500, // Fi
           child: Column(
             children: [
@@ -250,7 +252,99 @@ class _PartnerListPageState extends State<PartnerListPage> {
               ),
             ],
           ),
-        )));
+        ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMenuItem(
+              context,
+              icon: Icons.dashboard,
+              title: 'Historiques',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashboardUserPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.home, // Icône d'accueil
+              title: 'Accueil',
+              onTap: () {
+                // Réinitialiser la page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      // Récupérer l'email de l'utilisateur actuel
+                      User? user = FirebaseAuth.instance.currentUser;
+                      String userEmail = user?.email ??
+                          ''; // Par défaut, une chaîne vide si l'email est null
+
+                      return Menu_Accueil(userEmail: userEmail);
+                    },
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.people,
+              title: 'Partenaires',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PartnerListPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.subscriptions,
+              title: 'Abonnez vous',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionStatusScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 28, color: Colors.blue),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -265,7 +359,8 @@ class PartnerDetailsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           partnerInfo['nom_magasin'] ?? 'Détails du Partenaire',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.blue,
         centerTitle: true,

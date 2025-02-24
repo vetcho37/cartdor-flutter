@@ -6,6 +6,9 @@ import 'subscription_cinetpay.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'renew_abonnement.dart';
 import 'package:qr_flutter/qr_flutter.dart'; // Import du package pour générer le QR code
+import 'partenerpage.dart';
+import 'dashbord_abonne.dart';
+import 'menu_accueil.dart';
 
 class SubscriptionStatusScreen extends StatefulWidget {
   const SubscriptionStatusScreen({Key? key}) : super(key: key);
@@ -105,7 +108,7 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
         QrImageView(
           data: codeunique!,
           version: QrVersions.auto,
-          size: 200.0,
+          size: 250.0,
         ),
       ],
     );
@@ -116,17 +119,88 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
-        title: Text("Détails de l'Abonnement", style: TextStyle(fontSize: 20)),
+        title: Text("Détails de l'Abonnement",
+            style: TextStyle(fontSize: 20, color: Colors.white)),
         centerTitle: true,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : Padding(
+          : SingleChildScrollView(
+              // Utilisation de SingleChildScrollView
               padding: const EdgeInsets.all(20.0),
               child: Center(
                 child: _buildSubscriptionDetails(),
               ),
             ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMenuItem(
+              context,
+              icon: Icons.dashboard,
+              title: 'Historiques',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashboardUserPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.home, // Icône d'accueil
+              title: 'Accueil',
+              onTap: () {
+                // Réinitialiser la page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      // Récupérer l'email de l'utilisateur actuel
+                      User? user = FirebaseAuth.instance.currentUser;
+                      String userEmail = user?.email ??
+                          ''; // Par défaut, une chaîne vide si l'email est null
+
+                      return Menu_Accueil(userEmail: userEmail);
+                    },
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.people,
+              title: 'Partenaires',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PartnerListPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.subscriptions,
+              title: 'Abonnez vous',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionStatusScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -142,14 +216,13 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
             _buildQrCode(),
             SizedBox(height: 10),
             Text(
-              "Félicitations, votre abonnement est actif!",
+              "Félicitations, \n votre abonnement est actif!",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 13,
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             Text.rich(
               TextSpan(
                 text: "Code abonné: ",
@@ -162,9 +235,9 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
                 ],
               ),
             ),
-            Text("Nom: $name", style: TextStyle(fontSize: 15)),
-            Text("Téléphone: $phone", style: TextStyle(fontSize: 15)),
-            Text("Email: $emailclit", style: TextStyle(fontSize: 15)),
+            // Text("Nom: $name", style: TextStyle(fontSize: 15)),
+            // Text("Téléphone: $phone", style: TextStyle(fontSize: 15)),
+            // Text("Email: $emailclit", style: TextStyle(fontSize: 15)),
             Text(
                 "Date d'abonnement: ${subscriptionDate?.toLocal().toString().split(' ')[0]}",
                 style: TextStyle(fontSize: 15)),
@@ -176,7 +249,7 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
       );
     } else if (subscriptionStatus == 'Expiré') {
       return _buildSubscriptionContainer(
-        "Désolé, votre abonnement a expiré.",
+        "Désolé!, votre abonnement a expiré.",
         Colors.red,
         details: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,9 +261,9 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
                 "Date d'expiration: ${expirationDate?.toLocal().toString().split(' ')[0]}",
                 style: TextStyle(fontSize: 15)),
             Text("Code abonné: $codeunique", style: TextStyle(fontSize: 10)),
-            Text("Nom: $name", style: TextStyle(fontSize: 15)),
-            Text("Téléphone: $phone", style: TextStyle(fontSize: 15)),
-            Text("Email: $emailclit", style: TextStyle(fontSize: 15)),
+            // Text("Nom: $name", style: TextStyle(fontSize: 15)),
+            // Text("Téléphone: $phone", style: TextStyle(fontSize: 15)),
+            // Text("Email: $emailclit", style: TextStyle(fontSize: 15)),
           ],
         ),
       );
@@ -239,6 +312,27 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
       ),
     );
   }
+
+  Widget _buildMenuItem(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 28, color: Colors.blue),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class SubscriptionPage extends StatelessWidget {
@@ -265,6 +359,10 @@ class SubscriptionPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Column(
+              mainAxisAlignment:
+                  MainAxisAlignment.center, // Centre verticalement
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Centre horizontalement
               children: [
                 _buildAdvantageItem(
                     Icons.percent, "10% de réduction sur vos achats"),
@@ -297,19 +395,112 @@ class SubscriptionPage extends StatelessWidget {
           ],
         ),
       ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMenuItem(
+              context,
+              icon: Icons.dashboard,
+              title: 'Historiques',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashboardUserPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.home, // Icône d'accueil
+              title: 'Accueil',
+              onTap: () {
+                // Réinitialiser la page
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      User? user = FirebaseAuth.instance.currentUser;
+                      String userEmail = user?.email ?? '';
+                      return Menu_Accueil(userEmail: userEmail);
+                    },
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.people,
+              title: 'Partenaires',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PartnerListPage(),
+                  ),
+                );
+              },
+            ),
+            _buildMenuItem(
+              context,
+              icon: Icons.subscriptions,
+              title: 'Abonnez vous',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionStatusScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildAdvantageItem(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+    return Center(
+      // Ajoute Center ici pour centrer les éléments
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // Centre horizontalement
+        crossAxisAlignment: CrossAxisAlignment.center, // Centre verticalement
         children: [
-          Icon(icon, color: Colors.blueAccent, size: 24),
+          Icon(icon, size: 40, color: Colors.blueAccent),
           SizedBox(width: 10),
-          Expanded(child: Text(text, style: TextStyle(fontSize: 16))),
+          Text(
+            text,
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center, // Assure-toi que le texte est centré
+          ),
         ],
       ),
     );
   }
+}
+
+Widget _buildMenuItem(BuildContext context,
+    {required IconData icon,
+    required String title,
+    required VoidCallback onTap}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 28, color: Colors.blue),
+        SizedBox(height: 4),
+        Text(
+          title,
+          style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    ),
+  );
 }

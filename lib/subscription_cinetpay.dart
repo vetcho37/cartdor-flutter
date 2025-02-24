@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:html' as html;
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -23,10 +22,13 @@ class MyApp_cinet extends StatefulWidget {
 
 class _PaymentPageState extends State<MyApp_cinet> {
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final phoneController = TextEditingController();
-  final emailController = TextEditingController();
-  final amountController = TextEditingController(text: "100");
+
+  // User information variables
+  String userName = "";
+  String userPhone = "";
+  String userEmail = "";
+  bool isUserInfoLoaded = false;
+  bool isLoadingUserInfo = false;
 
   String? currentTransactionId;
   bool isProcessing = false;
@@ -37,10 +39,6 @@ class _PaymentPageState extends State<MyApp_cinet> {
 
   @override
   void dispose() {
-    nameController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    amountController.dispose();
     statusCheckTimer?.cancel();
     super.dispose();
   }
@@ -57,30 +55,68 @@ class _PaymentPageState extends State<MyApp_cinet> {
     });
   }
 
+  // Nouvelle méthode pour récupérer les informations de l'utilisateur connecté
+  Future<void> fetchCurrentUserInfo() async {
+    setState(() {
+      isLoadingUserInfo = true;
+    });
+
+    try {
+      // Récupérer l'utilisateur actuel
+      User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser != null && currentUser.email != null) {
+        // Enregistrer l'email de l'utilisateur connecté
+        userEmail = currentUser.email!;
+        addLog("Utilisateur connecté avec l'email: $userEmail");
+
+        // Récupérer les autres informations depuis Firestore
+        final usersCollection = FirebaseFirestore.instance.collection('users');
+        final querySnapshot = await usersCollection
+            .where('email', isEqualTo: userEmail)
+            .limit(1)
+            .get();
+
+        if (querySnapshot.docs.isNotEmpty) {
+          final userData = querySnapshot.docs.first.data();
+
+          setState(() {
+            // Récupérer le nom et le téléphone
+            userName = userData['full_name'] ?? userData['displayName'] ?? "";
+            userPhone = userData['phone'] ?? userData['phoneNumber'] ?? "";
+
+            isUserInfoLoaded = true;
+            addLog(
+                "Informations utilisateur récupérées: $userName, $userPhone");
+          });
+        } else {
+          addLog("Aucune information utilisateur trouvée dans Firestore");
+        }
+      } else {
+        addLog("Aucun utilisateur connecté ou email non disponible");
+      }
+    } catch (e) {
+      addLog("Erreur lors de la récupération des informations utilisateur: $e");
+    } finally {
+      setState(() {
+        isLoadingUserInfo = false;
+      });
+    }
+  }
+
   Future<void> initiateCinetPayPayment() async {
-    if (!_formKey.currentState!.validate()) {
-      addLog("Formulaire invalide. Vérifiez les champs.");
+    // Vérifier si les informations utilisateur sont disponibles
+    if (!isUserInfoLoaded) {
+      addLog(
+          "Informations utilisateur non disponibles. Impossible de procéder au paiement.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content:
+                Text("Veuillez vous connecter pour effectuer un paiement.")),
+      );
       return;
     }
 
-    // Récupérer l'email de l'utilisateur
-    String email = emailController.text.trim();
-
-    // Vérifier si l'email existe dans la base de données Firestore
-    final usersCollection = FirebaseFirestore.instance.collection('users');
-    final querySnapshot =
-        await usersCollection.where('email', isEqualTo: email).get();
-
-    if (querySnapshot.docs.isEmpty) {
-      // Si l'email n'existe pas, afficher un message d'erreur
-      addLog("L'email n'existe pas dans notre base de données.");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Utilisez votre email de l'inscription.")),
-      );
-      return; // Quitter la fonction si l'email n'est pas trouvé
-    }
-
-    // Si l'email existe, continuer avec le processus de paiement
     setState(() {
       isProcessing = true;
     });
@@ -102,9 +138,9 @@ class _PaymentPageState extends State<MyApp_cinet> {
         "amount": amount,
         "currency": "XOF",
         "description": "Paiement abonnement depuis Flutter Web",
-        "customer_name": nameController.text,
-        "customer_email": emailController.text,
-        "customer_phone_number": phoneController.text,
+        "customer_name": userName,
+        "customer_email": userEmail,
+        "customer_phone_number": userPhone,
         "channels": "ALL",
         "lang": "fr"
       };
@@ -113,9 +149,9 @@ class _PaymentPageState extends State<MyApp_cinet> {
 
       // Enregistrement des données dans localStorage pour les récupérer plus tard
       final userData = {
-        'name': nameController.text,
-        'email': emailController.text,
-        'phone': phoneController.text,
+        'name': userName,
+        'email': userEmail,
+        'phone': userPhone,
         'amount': amount,
         'transactionId': transactionId
       };
@@ -276,6 +312,9 @@ class _PaymentPageState extends State<MyApp_cinet> {
   void initState() {
     super.initState();
 
+    // Récupérer les informations de l'utilisateur connecté
+    fetchCurrentUserInfo();
+
     // Vérifier si une transaction est en cours depuis le localStorage
     try {
       final storedTransaction =
@@ -286,11 +325,6 @@ class _PaymentPageState extends State<MyApp_cinet> {
 
         if (currentTransactionId != null) {
           addLog("Transaction en cours détectée: $currentTransactionId");
-
-          // Restaurer les données du formulaire
-          nameController.text = transactionData['name'] ?? '';
-          emailController.text = transactionData['email'] ?? '';
-          phoneController.text = transactionData['phone'] ?? '';
 
           // Démarrer la vérification
           Future.delayed(Duration(seconds: 1), () {
@@ -368,111 +402,121 @@ class _PaymentPageState extends State<MyApp_cinet> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                  // Centrer le formulaire horizontalement
-                  child: Container(
-                width: 400, // Définir la largeur du formulaire à 400px
-                // Formulaire de paiement
-                child: Card(
-                  elevation: 4,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            "Abonnement CARTD'OR",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                child: Container(
+                  width: 400,
+                  child: Card(
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: isLoadingUserInfo
+                          ? Center(child: CircularProgressIndicator())
+                          : Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    "Abonnement CARTD'OR",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+
+                                  // Affichage des informations utilisateur
+                                  if (isUserInfoLoaded) ...[
+                                    ListTile(
+                                      title: Text("Nom"),
+                                      subtitle: Text(userName),
+                                      leading: Icon(Icons.person),
+                                      dense: true,
+                                    ),
+                                    Divider(),
+                                    ListTile(
+                                      title: Text("Email"),
+                                      subtitle: Text(userEmail),
+                                      leading: Icon(Icons.email),
+                                      dense: true,
+                                    ),
+                                    Divider(),
+                                    ListTile(
+                                      title: Text("Téléphone"),
+                                      subtitle: Text(userPhone),
+                                      leading: Icon(Icons.phone),
+                                      dense: true,
+                                    ),
+                                  ] else ...[
+                                    // Message si l'utilisateur n'est pas connecté
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        "Veuillez vous connecter pour procéder au paiement",
+                                        style: TextStyle(color: Colors.red),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+
+                                  SizedBox(height: 12),
+
+                                  // Affichage du montant
+                                  Card(
+                                    color: Colors.blue.shade50,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            "Montant à payer",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            "100 XOF",
+                                            style: TextStyle(
+                                              color: Colors.blue.shade800,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 20),
+
+                                  // Bouton de paiement
+                                  ElevatedButton.icon(
+                                    onPressed:
+                                        (isProcessing || !isUserInfoLoaded)
+                                            ? null
+                                            : initiateCinetPayPayment,
+                                    icon: Icon(Icons.payment),
+                                    label: Text(isProcessing
+                                        ? "Traitement en cours..."
+                                        : "Procéder au paiement"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      foregroundColor: Colors.white,
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 15),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 16),
-                          TextFormField(
-                            controller: nameController,
-                            decoration: InputDecoration(
-                              labelText: "Nom complet",
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Veuillez entrer votre nom";
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(height: 12),
-                          TextFormField(
-                            controller: phoneController,
-                            decoration: InputDecoration(
-                              labelText: "Téléphone",
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null ||
-                                  value.isEmpty ||
-                                  value.length < 8) {
-                                return "Veuillez entrer un numéro de téléphone valide";
-                              }
-                              return null;
-                            },
-                            keyboardType: TextInputType.phone,
-                          ),
-                          SizedBox(height: 12),
-                          TextFormField(
-                            controller: emailController,
-                            decoration: InputDecoration(
-                              labelText: "Email",
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null ||
-                                  value.isEmpty ||
-                                  !value.contains('@')) {
-                                return "Veuillez entrer un email valide";
-                              }
-                              return null;
-                            },
-                            keyboardType: TextInputType.emailAddress,
-                          ),
-                          SizedBox(height: 12),
-                          Text(
-                            "100 XOF", // Affiche la valeur du montant
-                            style: TextStyle(
-                              color: Colors.blue, // Met la valeur en rouge
-                              fontWeight:
-                                  FontWeight.bold, // Optionnel : mettre en gras
-                              fontSize:
-                                  16, // Optionnel : ajuster la taille du texte
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          ElevatedButton.icon(
-                            onPressed:
-                                isProcessing ? null : initiateCinetPayPayment,
-                            icon: Icon(Icons.payment),
-                            label: Text(isProcessing
-                                ? "Traitement en cours..."
-                                : "Procéder au paiement"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  Colors.blue, // Définir l'arrière-plan bleu
-                              foregroundColor: Colors.white, // Texte en blanc
-                              padding: EdgeInsets.symmetric(vertical: 15),
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
                   ),
                 ),
-              )),
+              ),
 
               // Section de vérification manuelle
               if (currentTransactionId != null)
                 Center(
-                  // Centrer la Card
                   child: Card(
                     elevation: 4,
                     child: Padding(
@@ -490,11 +534,8 @@ class _PaymentPageState extends State<MyApp_cinet> {
                           SizedBox(height: 8),
                           Text("ID: $currentTransactionId"),
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.center, // Centrer les boutons
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              // Bouton Vérifier maintenant avec largeur réduite
-
                               SizedBox(width: 8),
                             ],
                           ),
