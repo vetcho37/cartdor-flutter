@@ -108,7 +108,7 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
         QrImageView(
           data: codeunique!,
           version: QrVersions.auto,
-          size: 250.0,
+          size: 300.0,
         ),
       ],
     );

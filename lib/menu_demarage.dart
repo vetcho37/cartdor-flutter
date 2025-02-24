@@ -48,8 +48,8 @@ class StartMenu extends StatelessWidget {
           // QR Code avec 10% réduction
           Image.asset(
             'assets/images/scanme.png',
-            width: 120,
-            height: 120,
+            width: 160,
+            height: 160,
           ),
           Text(
             "10% Réduction",
