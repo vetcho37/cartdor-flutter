@@ -216,9 +216,9 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
             _buildQrCode(),
             SizedBox(height: 10),
             Text(
-              "Félicitations, \n votre abonnement est actif!",
+              "Félicitations, $name!\nVotre abonnement est actif!",
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 15,
                 color: Colors.green,
                 fontWeight: FontWeight.bold,
               ),
@@ -249,7 +249,7 @@ class _SubscriptionStatusScreenState extends State<SubscriptionStatusScreen> {
       );
     } else if (subscriptionStatus == 'Expiré') {
       return _buildSubscriptionContainer(
-        "Désolé!, votre abonnement a expiré.",
+        "Désolé, $name! Votre abonnement a expiré.",
         Colors.red,
         details: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
