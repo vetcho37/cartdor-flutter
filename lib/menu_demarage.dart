@@ -35,32 +35,24 @@ class StartMenu extends StatelessWidget {
             ),
           ),
 
-          // Texte "SCAN et PROFITES"
+          SizedBox(height: 20),
+
+          // Texte accrocheur principal
           Text(
-            "ABONNES TOI ET PROFITES!",
+            "-10% SUR TOUS VOS ACHATS!",
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 36,
               fontWeight: FontWeight.bold,
               color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 10),
-          // QR Code avec 10% réduction
-          Image.asset(
-            'assets/images/scanme.png',
-            width: 160,
-            height: 160,
-          ),
-          Text(
-            "10% Réduction",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontFamily: 'Raleway',
+              letterSpacing: 1.5,
             ),
           ),
 
-          SizedBox(height: 30),
+          SizedBox(height: 10),
+
+// Texte indiquant la réduction de 10%
+          SizedBox(height: 40),
 
           // Bouton "Se connecter"
           ElevatedButton(

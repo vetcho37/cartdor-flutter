@@ -58,6 +58,18 @@ class DashboardPageState extends State<DashboardPage> {
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
         title: Text('Tableau de bord - ${widget.storeName}'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.blue),
+            onPressed: () {
+              // Redirection vers la page de connexion
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: Center(
         // Centre tout le contenu

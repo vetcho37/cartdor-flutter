@@ -56,7 +56,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false, // Supprime le bandeau de débogage
       home:
-          StartMenu(), // Page d'accueil ou toute autre page que tu veux utiliser comme page principale
+          LoginPage(), // Page d'accueil ou toute autre page que tu veux utiliser comme page principale
     );
   }
 }

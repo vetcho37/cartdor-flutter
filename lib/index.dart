@@ -120,13 +120,14 @@ class LoginPageState extends State<LoginPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Icône utilisateur au lieu du texte "Cartd'Or"
-                  const Icon(
-                    Icons.person,
-                    size: 100, // Taille de l'icône
-                    color: Colors.blue, // Couleur de l'icône
+                  // Logo CartDor au lieu de l'icône utilisateur
+                  Image.asset(
+                    'assets/images/cartdorallbleu.png', // Assurez-vous que le chemin est correct
+                    width: 150, // Ajustez la taille selon vos besoins
+                    height: 150,
+                    fit: BoxFit.contain,
                   ),
-                  const SizedBox(height: 10), // Espacement sous l'icône
+                  const SizedBox(height: 10), // Espacement sous le logo
 
                   const SizedBox(height: 30),
                   TextField(
