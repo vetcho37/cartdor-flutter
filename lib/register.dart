@@ -195,9 +195,8 @@ class _SignUpPageState extends State<SignUpPage> {
                   TextFormField(
                     controller: fullNameController,
                     decoration: InputDecoration(labelText: "Nom complet"),
-                    validator: (value) =>
-                        validateLettersOnly(value ?? '', "nom complet"),
                   ),
+
                   // Ville
                   TextFormField(
                     controller: cityController,
@@ -214,6 +213,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     keyboardType: TextInputType.phone,
                     validator: (value) => validatePhone(value ?? ''),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Indiquez le code pays suivi du numéro",
+                    style: TextStyle(fontSize: 12, color: Colors.blue),
                   ),
                   // Email
                   TextFormField(

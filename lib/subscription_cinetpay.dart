@@ -36,10 +36,12 @@ class _PaymentPageState extends State<MyApp_cinet> {
 
   // Pour la vérification périodique
   Timer? statusCheckTimer;
+  Timer? subscriptionCheckTimer;
 
   @override
   void dispose() {
     statusCheckTimer?.cancel();
+    subscriptionCheckTimer?.cancel();
     super.dispose();
   }
 
@@ -308,12 +310,86 @@ class _PaymentPageState extends State<MyApp_cinet> {
     }
   }
 
+  Future<void> updateExpiredSubscriptions() async {
+    try {
+      // Récupérer la collection des abonnements
+      final subscriptionsCollection =
+          FirebaseFirestore.instance.collection('subscriptions');
+
+      // Récupérer la date actuelle
+      final now = DateTime.now();
+
+      addLog('Début de la vérification des abonnements expirés...');
+
+      // Récupérer les abonnements actifs dont la date d'expiration est dépassée
+      final expiredSubscriptionsQuery = await subscriptionsCollection
+          .where('expirationDate', isLessThan: Timestamp.fromDate(now))
+          .where('status', isEqualTo: 'Actif')
+          .get();
+
+      if (expiredSubscriptionsQuery.docs.isEmpty) {
+        addLog('Aucun abonnement expiré trouvé.');
+        return;
+      }
+
+      addLog(
+          'Nombre d\'abonnements expirés trouvés: ${expiredSubscriptionsQuery.docs.length}');
+
+      // Utilisation d'un batch pour optimiser les mises à jour Firestore
+      final WriteBatch batch = FirebaseFirestore.instance.batch();
+
+      for (var doc in expiredSubscriptionsQuery.docs) {
+        final subscriptionId = doc.id;
+        final subscriptionData = doc.data();
+        final expirationDate =
+            (subscriptionData['expirationDate'] as Timestamp).toDate();
+
+        addLog(
+            'Traitement de l\'abonnement $subscriptionId - Expiration: $expirationDate');
+
+        // Vérification finale avant mise à jour
+        if (expirationDate.isBefore(now)) {
+          batch.update(subscriptionsCollection.doc(subscriptionId), {
+            'status': 'Expiré',
+            'lastUpdated': Timestamp.fromDate(
+                now), // Ajout d'un champ pour suivre les mises à jour
+          });
+          addLog('Abonnement $subscriptionId mis à jour à Expiré.');
+        }
+      }
+
+      // Appliquer toutes les mises à jour en une seule opération
+      await batch.commit();
+      addLog('✅ Mise à jour des abonnements expirés terminée avec succès.');
+    } catch (e) {
+      addLog('❌ Erreur lors de la mise à jour des abonnements expirés : $e');
+    }
+  }
+
+  // Fonction pour exécuter la vérification périodiquement
+  void startSubscriptionCheck() {
+    addLog('⏳ Démarrage du vérificateur d\'abonnements...');
+
+    // Exécuter une première vérification immédiatement
+    updateExpiredSubscriptions();
+
+    // Puis configurer une vérification périodique
+    // En production, utilisez un intervalle plus long comme 24 heures
+    subscriptionCheckTimer = Timer.periodic(Duration(hours: 24), (Timer t) {
+      addLog('🔄 Exécution de la mise à jour des abonnements expirés...');
+      updateExpiredSubscriptions();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
     // Récupérer les informations de l'utilisateur connecté
     fetchCurrentUserInfo();
+
+    // Démarrer la vérification des abonnements expirés
+    startSubscriptionCheck();
 
     // Vérifier si une transaction est en cours depuis le localStorage
     try {
@@ -335,58 +411,6 @@ class _PaymentPageState extends State<MyApp_cinet> {
     } catch (e) {
       addLog("Erreur lors de la récupération des données stockées: $e");
     }
-  }
-
-  Future<void> updateExpiredSubscriptions() async {
-    try {
-      // Récupérer la collection d'abonnements
-      final subscriptionsCollection =
-          FirebaseFirestore.instance.collection('subscriptions');
-
-      // Récupérer la date actuelle
-      final now = DateTime.now();
-
-      // Récupérer tous les abonnements dont la date d'expiration est avant aujourd'hui
-      final expiredSubscriptionsQuery = await subscriptionsCollection
-          .where('expirationDate', isLessThanOrEqualTo: Timestamp.fromDate(now))
-          .where('status',
-              isEqualTo:
-                  'Actif') // On vérifie que l'abonnement est encore actif
-          .get();
-
-      if (expiredSubscriptionsQuery.docs.isEmpty) {
-        print('Aucun abonnement expiré trouvé.');
-        return;
-      }
-
-      // Pour chaque abonnement expiré, on met à jour le statut
-      for (var doc in expiredSubscriptionsQuery.docs) {
-        final subscriptionId = doc.id;
-        final subscriptionData = doc.data();
-        final expirationDate =
-            (subscriptionData['expirationDate'] as Timestamp).toDate();
-
-        // Vérification si la date d'expiration est bien antérieure à la date actuelle
-        if (expirationDate.isBefore(now)) {
-          // Mettre à jour le statut de l'abonnement à "Expiré"
-          await subscriptionsCollection.doc(subscriptionId).update({
-            'status': 'Expiré',
-            'expirationDate': Timestamp.fromDate(
-                now), // Mettre à jour la date d'expiration si nécessaire
-          });
-
-          // print('Abonnement ${subscriptionId} mis à jour à Expiré.');
-        }
-      }
-    } catch (e) {
-      print('Erreur lors de la mise à jour des abonnements expirés: $e');
-    }
-  }
-
-  void startSubscriptionCheck() {
-    Timer.periodic(Duration(hours: 24), (Timer t) {
-      updateExpiredSubscriptions();
-    });
   }
 
   @override
@@ -506,6 +530,25 @@ class _PaymentPageState extends State<MyApp_cinet> {
                                           EdgeInsets.symmetric(vertical: 15),
                                     ),
                                   ),
+
+                                  // // Bouton pour vérifier manuellement les abonnements expirés
+                                  // SizedBox(height: 10),
+                                  // ElevatedButton.icon(
+                                  //   onPressed: () {
+                                  //     addLog(
+                                  //         "Vérification manuelle des abonnements expirés...");
+                                  //     updateExpiredSubscriptions();
+                                  //   },
+                                  //   icon: Icon(Icons.update),
+                                  //   label: Text(
+                                  //       "Vérifier les abonnements expirés"),
+                                  //   style: ElevatedButton.styleFrom(
+                                  //     backgroundColor: Colors.amber,
+                                  //     foregroundColor: Colors.black,
+                                  //     padding:
+                                  //         EdgeInsets.symmetric(vertical: 10),
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ),
@@ -532,7 +575,7 @@ class _PaymentPageState extends State<MyApp_cinet> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          Text("ID: $currentTransactionId"),
+                          // Text("ID: $currentTransactionId"),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -545,7 +588,7 @@ class _PaymentPageState extends State<MyApp_cinet> {
                   ),
                 ),
 
-              SizedBox(height: 24),
+              SizedBox(height: 16)
             ],
           ),
         ),
