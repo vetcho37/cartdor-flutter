@@ -6,7 +6,7 @@ import 'transactionpage.dart';
 
 class ScanQRCodePage extends StatefulWidget {
   final String codeVendeur;
- 
+
   ScanQRCodePage({required this.codeVendeur});
 
   @override
@@ -128,15 +128,13 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Détails de l\'abonné'),
-        content: Column( 
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Nom: $name', style: TextStyle(fontSize: 18)),
             Text('Téléphone: $phone', style: TextStyle(fontSize: 18)),
             Text('Email: $email', style: TextStyle(fontSize: 18)),
-            Text('Créé le: ${DateFormat('dd/MM/yyyy').format(creationDate)}',
-                style: TextStyle(fontSize: 18)),
             Text(
                 'Expire le: ${DateFormat('dd/MM/yyyy').format(expirationDate)}',
                 style: TextStyle(fontSize: 18)),
@@ -166,7 +164,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
                 Navigator.of(context).pop();
                 _redirectToTransactionPage();
               },
-              child: Text('Continuer vers Transaction'),
+              child: Text('Continuer la  Transaction'),
             ),
         ],
       ),

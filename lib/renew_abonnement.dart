@@ -573,7 +573,6 @@ class _PaymentPageState extends State<MyApp_renew> {
                             ),
                           ),
                           SizedBox(height: 8),
-                          // Text("ID: $currentTransactionId"),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
