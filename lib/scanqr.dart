@@ -136,7 +136,10 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
             Text('Téléphone: $phone', style: TextStyle(fontSize: 18)),
             Text('Email: $email', style: TextStyle(fontSize: 18)),
             Text(
-                'Expire le: ${DateFormat('dd/MM/yyyy').format(expirationDate)}',
+                'Date dabonnement: ${DateFormat('dd/MM/yyyy').format(creationDate)}',
+                style: TextStyle(fontSize: 18)),
+            Text(
+                'Fin dabonnement: ${DateFormat('dd/MM/yyyy').format(expirationDate)}',
                 style: TextStyle(fontSize: 18)),
             Text(
               isActive ? 'Statut: Actif' : 'Statut: Non Actif',
