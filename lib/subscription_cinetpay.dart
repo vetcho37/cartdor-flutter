@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:html' as html;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'statutabonement.dart';
 
 String generateUniqueCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -471,7 +472,6 @@ class _PaymentPageState extends State<MyApp_cinet> {
                                       dense: true,
                                     ),
                                   ] else ...[
-                                    // Message si l'utilisateur n'est pas connecté
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Text(
@@ -530,25 +530,6 @@ class _PaymentPageState extends State<MyApp_cinet> {
                                           EdgeInsets.symmetric(vertical: 15),
                                     ),
                                   ),
-
-                                  // // Bouton pour vérifier manuellement les abonnements expirés
-                                  // SizedBox(height: 10),
-                                  // ElevatedButton.icon(
-                                  //   onPressed: () {
-                                  //     addLog(
-                                  //         "Vérification manuelle des abonnements expirés...");
-                                  //     updateExpiredSubscriptions();
-                                  //   },
-                                  //   icon: Icon(Icons.update),
-                                  //   label: Text(
-                                  //       "Vérifier les abonnements expirés"),
-                                  //   style: ElevatedButton.styleFrom(
-                                  //     backgroundColor: Colors.amber,
-                                  //     foregroundColor: Colors.black,
-                                  //     padding:
-                                  //         EdgeInsets.symmetric(vertical: 10),
-                                  //   ),
-                                  // ),
                                 ],
                               ),
                             ),
@@ -556,8 +537,6 @@ class _PaymentPageState extends State<MyApp_cinet> {
                   ),
                 ),
               ),
-
-              // Section de vérification manuelle
               if (currentTransactionId != null)
                 Center(
                   child: Card(
@@ -586,11 +565,53 @@ class _PaymentPageState extends State<MyApp_cinet> {
                     ),
                   ),
                 ),
-
-              SizedBox(height: 16)
+              SizedBox(height: 16),
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildMenuItem(
+              context,
+              icon: Icons.subscriptions,
+              title: 'verifiez votre abonnement',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SubscriptionStatusScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 28, color: Colors.blue),
+          SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }

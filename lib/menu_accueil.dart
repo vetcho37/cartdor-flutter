@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:async'; // Pour Timer
 import 'statutabonement.dart';
 
 class Menu_Accueil extends StatefulWidget {
@@ -23,11 +24,105 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
   bool showSearchBar = false;
   String searchQuery = '';
   late Future<List<Map<String, dynamic>>> transactionsFuture;
+  Timer? subscriptionCheckTimer;
+  List<String> logs = [];
 
   @override
   void initState() {
     super.initState();
     transactionsFuture = getTransactionsByEmail(widget.userEmail);
+
+    // Démarrer la vérification des abonnements expirés
+    startSubscriptionCheck();
+  }
+
+  @override
+  void dispose() {
+    // Annuler le timer lorsque la page est fermée
+    subscriptionCheckTimer?.cancel();
+    super.dispose();
+  }
+
+  void addLog(String message) {
+    print(message); // Print to console
+    setState(() {
+      logs.add("${DateFormat('HH:mm:ss').format(DateTime.now())}: $message");
+      // Keep only the latest 100 logs
+      if (logs.length > 100) {
+        logs.removeAt(0);
+      }
+    });
+  }
+
+  Future<void> updateExpiredSubscriptions() async {
+    try {
+      // Récupérer la collection des abonnements
+      final subscriptionsCollection =
+          FirebaseFirestore.instance.collection('subscriptions');
+
+      // Récupérer la date actuelle
+      final now = DateTime.now();
+
+      addLog('Début de la vérification des abonnements expirés...');
+
+      // Récupérer les abonnements actifs dont la date d'expiration est dépassée
+      final expiredSubscriptionsQuery = await subscriptionsCollection
+          .where('expirationDate', isLessThan: Timestamp.fromDate(now))
+          .where('status', isEqualTo: 'Actif')
+          .get();
+
+      if (expiredSubscriptionsQuery.docs.isEmpty) {
+        addLog('Aucun abonnement expiré trouvé.');
+        return;
+      }
+
+      addLog(
+          'Nombre d\'abonnements expirés trouvés: ${expiredSubscriptionsQuery.docs.length}');
+
+      // Utilisation d'un batch pour optimiser les mises à jour Firestore
+      final WriteBatch batch = FirebaseFirestore.instance.batch();
+
+      for (var doc in expiredSubscriptionsQuery.docs) {
+        final subscriptionId = doc.id;
+        final subscriptionData = doc.data();
+        final expirationDate =
+            (subscriptionData['expirationDate'] as Timestamp).toDate();
+
+        addLog(
+            'Traitement de l\'abonnement $subscriptionId - Expiration: $expirationDate');
+
+        // Vérification finale avant mise à jour
+        if (expirationDate.isBefore(now)) {
+          batch.update(subscriptionsCollection.doc(subscriptionId), {
+            'status': 'Expiré',
+            'lastUpdated': Timestamp.fromDate(
+                now), // Ajout d'un champ pour suivre les mises à jour
+          });
+          addLog('Abonnement $subscriptionId mis à jour à Expiré.');
+        }
+      }
+
+      // Appliquer toutes les mises à jour en une seule opération
+      await batch.commit();
+      addLog('✅ Mise à jour des abonnements expirés terminée avec succès.');
+    } catch (e) {
+      addLog('❌ Erreur lors de la mise à jour des abonnements expirés : $e');
+    }
+  }
+
+  // Fonction pour exécuter la vérification périodiquement
+  void startSubscriptionCheck() {
+    addLog('⏳ Démarrage du vérificateur d\'abonnements...');
+
+    // Exécuter une première vérification immédiatement
+    updateExpiredSubscriptions();
+
+    // Puis configurer une vérification périodique
+    // En production, utilisez un intervalle plus long comme 24 heures
+    subscriptionCheckTimer = Timer.periodic(Duration(hours: 24), (Timer t) {
+      addLog('🔄 Exécution de la mise à jour des abonnements expirés...');
+      updateExpiredSubscriptions();
+    });
   }
 
   // Fonction pour gérer la déconnexion
