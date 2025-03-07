@@ -499,7 +499,7 @@ class _PaymentPageState extends State<MyApp_cinet> {
                                           ),
                                           SizedBox(height: 4),
                                           Text(
-                                            "100 XOF",
+                                            "2000 XOF",
                                             style: TextStyle(
                                               color: Colors.blue.shade800,
                                               fontWeight: FontWeight.bold,
