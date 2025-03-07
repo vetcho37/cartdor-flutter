@@ -129,7 +129,7 @@ class _PaymentPageState extends State<MyApp_cinet> {
       final transactionId = Random().nextInt(10000000).toString();
       currentTransactionId = transactionId;
 
-      final amount = 100;
+      final amount = 2000;
 
       addLog("Initialisation du paiement pour la transaction: $transactionId");
 
