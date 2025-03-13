@@ -8,13 +8,13 @@ import 'dart:math'; // Import pour générer un identifiant unique
 import 'seller_dashboard.dart';
 import 'scanqr.dart';
 
-class DashboardPage extends StatefulWidget {
+class DashboardPageNoreduce extends StatefulWidget {
   final String storeName;
   final String storeLocation;
   final String storePhone;
   final String codeVendeur;
 
-  DashboardPage({
+  DashboardPageNoreduce({
     required this.storeName,
     required this.storeLocation,
     required this.storePhone,
@@ -25,7 +25,7 @@ class DashboardPage extends StatefulWidget {
   DashboardPageState createState() => DashboardPageState();
 }
 
-class DashboardPageState extends State<DashboardPage> {
+class DashboardPageState extends State<DashboardPageNoreduce> {
   late Stream<QuerySnapshot> transactionsStream;
   bool showSearchBar = false;
   String searchQuery = ''; // Stocke la requête de recherche
@@ -208,8 +208,7 @@ class DashboardPageState extends State<DashboardPage> {
                           final amountAfterDiscount =
                               transactionData['amount'] ?? 0.0;
 
-                          final reduction = initialAmount * 0.10;
-                          final finalAmount = initialAmount - reduction;
+                          ;
 
                           return Card(
                             shape: RoundedRectangleBorder(
@@ -270,32 +269,6 @@ class DashboardPageState extends State<DashboardPage> {
                                     ],
                                   ),
                                   SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.discount,
-                                          size: 18, color: Colors.purple),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        'réduction (10%): ${reduction.toStringAsFixed(2)} FCFA',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.payment,
-                                          size: 18, color: Colors.green),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        'Montant Reçu: ${amountAfterDiscount.toStringAsFixed(2)} FCFA',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.green),
-                                      ),
-                                    ],
-                                  ),
                                 ],
                               ),
                             ),
@@ -352,7 +325,7 @@ class DashboardPageState extends State<DashboardPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DashboardPage(
+                    builder: (context) => DashboardPageNoreduce(
                         storeName: widget.storeName,
                         storeLocation: widget.storeLocation,
                         storePhone: widget.storePhone,
@@ -481,7 +454,7 @@ class StatisticsPageState extends State<StatisticsPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => DashboardPage(
+                    builder: (context) => DashboardPageNoreduce(
                         storeName: widget.storeName,
                         storeLocation: widget.storeLocation,
                         storePhone: widget.storePhone,
@@ -573,12 +546,11 @@ class StatisticsPageState extends State<StatisticsPage> {
                 transactions.forEach((transaction) {
                   final data = transaction.data() as Map<String, dynamic>;
                   final initialAmount = data['initialAmount'] ?? 0.0;
-                  final reduction = initialAmount * 0.10;
-                  final netCA = initialAmount - reduction;
-
+                  //final reduction = initialAmount * 0.10;
+                  //final netCA = initialAmount - reduction;
                   totalCA += initialAmount;
-                  totalReduction += reduction;
-                  totalNetCA += netCA;
+                  // totalReduction += reduction;
+                  //totalNetCA += initialAmount;
                 });
 
                 return SingleChildScrollView(
@@ -605,22 +577,6 @@ class StatisticsPageState extends State<StatisticsPage> {
                             style: TextStyle(color: Colors.orange),
                           ),
                         )
-                      ]),
-                      DataRow(cells: [
-                        DataCell(Text('Réduction (10%)')),
-                        DataCell(
-                          Text(
-                            totalReduction.toStringAsFixed(2) + ' FCFA',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        )
-                      ]),
-                      DataRow(cells: [
-                        DataCell(Text('CA Net')),
-                        DataCell(Text(
-                          totalNetCA.toStringAsFixed(2) + ' FCFA',
-                          style: TextStyle(color: Colors.green),
-                        ))
                       ]),
                     ],
                   ),
@@ -679,19 +635,19 @@ class StatisticsPageState extends State<StatisticsPage> {
 
                   if (subscribers.containsKey(subscriberName)) {
                     subscribers[subscriberName]!['transactions'] += 1;
-                    subscribers[subscriberName]!['netCA'] += netCA;
+                    subscribers[subscriberName]!['netCA'] += initialAmount;
                   } else {
                     subscribers[subscriberName] = {
                       'transactions': 1,
-                      'netCA': netCA,
+                      'netCA': initialAmount,
                     };
                   }
                 }
 
                 List<MapEntry<String, Map<String, dynamic>>> sortedSubscribers =
                     subscribers.entries.toList()
-                      ..sort((a, b) =>
-                          b.value['netCA'].compareTo(a.value['netCA']));
+                      ..sort((a, b) => b.value['initialAmount']
+                          .compareTo(a.value['initialAmount']));
 
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
@@ -712,7 +668,7 @@ class StatisticsPageState extends State<StatisticsPage> {
                         DataCell(Text(entry.key)),
                         DataCell(Text(entry.value['transactions'].toString())),
                         DataCell(Text(
-                            '${entry.value['netCA'].toStringAsFixed(2)} FCFA')),
+                            '${entry.value['initialAmount'].toStringAsFixed(2)} FCFA')),
                       ]);
                     }).toList(),
                   ),
@@ -724,69 +680,4 @@ class StatisticsPageState extends State<StatisticsPage> {
       ),
     );
   }
-
-  // Widget _buildDailyRevenueTable(String codeVendeur) {
-  //   return Card(
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-  //     elevation: 8,
-  //     color: Colors.orange[50],
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16.0),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             'Recettes Journalières',
-  //             style: TextStyle(
-  //                 fontSize: 22,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: Colors.orange),
-  //           ),
-  //           SizedBox(height: 10),
-  //           StreamBuilder<QuerySnapshot>(
-  //             stream: FirebaseFirestore.instance
-  //                 .collection('transactions')
-  //                 .where('codeVendeur',
-  //                     isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
-  //                 .snapshots(),
-  //             builder: (context, snapshot) {
-  //               if (snapshot.connectionState == ConnectionState.waiting) {
-  //                 return Center(child: CircularProgressIndicator());
-  //               }
-
-  //               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-  //                 return Center(child: Text('Aucune donnée de recettes.'));
-  //               }
-
-  //               // Code pour afficher les recettes journalières
-  //               return SingleChildScrollView(
-  //                 scrollDirection: Axis.horizontal,
-  //                 child: DataTable(
-  //                   columns: [
-  //                     DataColumn(
-  //                         label: Text('Date',
-  //                             style: TextStyle(fontWeight: FontWeight.bold))),
-  //                     DataColumn(
-  //                         label: Text('CA',
-  //                             style: TextStyle(fontWeight: FontWeight.bold))),
-  //                   ],
-  //                   rows: [
-  //                     DataRow(cells: [
-  //                       DataCell(Text('01/02/2025')),
-  //                       DataCell(Text('1,200,000 FCFA')),
-  //                     ]),
-  //                     DataRow(cells: [
-  //                       DataCell(Text('02/02/2025')),
-  //                       DataCell(Text('1,300,000 FCFA')),
-  //                     ]),
-  //                   ],
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
 }

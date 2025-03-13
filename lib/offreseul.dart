@@ -15,7 +15,7 @@ class TransactionNoDiscountPage extends StatefulWidget {
   final String storeName;
   final String storeLocation;
   final String storePhone;
- // final String offre;
+  // final String offre;
 
   TransactionNoDiscountPage({
     required this.name,
@@ -39,7 +39,7 @@ class TransactionNoDiscountPage extends StatefulWidget {
 class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
   final TextEditingController _amountController = TextEditingController();
   String transactionCode = '';
-  double initialAmount = 0.0; // Montant initial avant réduction
+  //double initialAmount = 0.0; // Montant initial avant réduction
 
   @override
   void initState() {
@@ -66,7 +66,7 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
         'storeName': widget.storeName,
         'storeLocation': widget.storeLocation,
         'storePhone': widget.storePhone,
-        'initialAmount': amount,
+        //'initialAmount': amount,
         'amount': amount,
         //'offre': widget.offre,
         'date': DateTime.now(),

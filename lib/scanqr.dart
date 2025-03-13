@@ -169,14 +169,14 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
                 Navigator.of(context).pop();
                 _redirectToTransactionPage();
               },
-              child: Text('Continuer la  Transaction'),
+              child: Text('Appliquer la reduction'),
             ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
               _redirectToTransactionPagesansreduction();
             },
-            child: Text('Appliquer sans réduction'),
+            child: Text('valider votre offre'),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
           ),
         ],
@@ -200,7 +200,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
-         // offre: offre,
+          // offre: offre,
         ),
       ),
     );
