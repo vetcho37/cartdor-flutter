@@ -26,6 +26,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
   late String storeName;
   late String storeLocation;
   late String storePhone;
+  late String offre;
 
   @override
   Widget build(BuildContext context) {
@@ -170,15 +171,14 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
               },
               child: Text('Continuer la  Transaction'),
             ),
-
-             ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-            _redirectToTransactionPagesansreduction();
-          },
-          child: Text('Appliquer sans réduction'),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-        ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _redirectToTransactionPagesansreduction();
+            },
+            child: Text('Appliquer sans réduction'),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+          ),
         ],
       ),
     );
@@ -200,6 +200,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
+          offre: offre,
         ),
       ),
     );
@@ -220,6 +221,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
+          offre: offre,
         ),
       ),
     );
