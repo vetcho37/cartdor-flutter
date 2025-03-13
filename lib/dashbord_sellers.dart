@@ -1,6 +1,5 @@
 import 'package:cartdor/index.dart';
 import 'package:cartdor/scanqr.dart';
-import 'package:cartdor/val_abonn_code.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
