@@ -3,51 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'dashbord_sellers.dart';
-<<<<<<< HEAD
-import 'transactionNoreduce.dart';
-=======
->>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
+import 'dashboardsimple.dart';
 
-class TransactionNoDiscountPage extends StatefulWidget {
+class TransactionNoReducePage extends StatefulWidget {
   final String name;
   final String phone;
   final String email;
-  final DateTime creationDate;
-  final DateTime expirationDate;
-  final String status;
   final String codeVendeur;
   final String storeName;
   final String storeLocation;
   final String storePhone;
-  // final String offre;
 
-  TransactionNoDiscountPage({
+  TransactionNoReducePage({
     required this.name,
     required this.phone,
     required this.email,
-    required this.creationDate,
-    required this.expirationDate,
-    required this.status,
     required this.codeVendeur,
     required this.storeName,
     required this.storeLocation,
     required this.storePhone,
-    //required this.offre,
   });
 
   @override
-  _TransactionNoDiscountPageState createState() =>
-      _TransactionNoDiscountPageState();
+  _TransactionNoReducePageState createState() =>
+      _TransactionNoReducePageState();
 }
 
-class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
+class _TransactionNoReducePageState extends State<TransactionNoReducePage> {
   final TextEditingController _amountController = TextEditingController();
+  double initialAmount = 0.0;
+  double finalAmount = 0.0;
   String transactionCode = '';
-<<<<<<< HEAD
-  double initialAmount = 0.0; // Montant initial avant réduction
-=======
-  //double initialAmount = 0.0; // Montant initial avant réduction
->>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
 
   @override
   void initState() {
@@ -61,9 +47,15 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
     return 'TXN-${timestamp}-${random.nextInt(1000)}';
   }
 
-  void _saveTransaction() async {
-    double amount = double.tryParse(_amountController.text) ?? 0.0;
+  void _updateAmount() {
+    setState(() {
+      initialAmount = double.tryParse(_amountController.text) ?? 0.0;
+      finalAmount =
+          initialAmount; // Pas de réduction, donc le montant reste le même
+    });
+  }
 
+  void _saveTransaction() async {
     try {
       await FirebaseFirestore.instance.collection('transactions').add({
         'transactionCode': transactionCode,
@@ -74,17 +66,9 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
         'storeName': widget.storeName,
         'storeLocation': widget.storeLocation,
         'storePhone': widget.storePhone,
-<<<<<<< HEAD
-        'initialAmount': amount,
-        'amount': amount,
-=======
-        //'initialAmount': amount,
-        'amount': amount,
-        //'offre': widget.offre,
->>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
+        'initialAmount': initialAmount,
+        'amount': finalAmount,
         'date': DateTime.now(),
-        'isDiscountApplied':
-            false, // Indique que la réduction n'a pas été appliquée
       });
 
       showDialog(
@@ -92,7 +76,7 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
         builder: (context) => AlertDialog(
           title: Text('Transaction enregistrée'),
           content: Text(
-              'Transaction enregistrée pour ${widget.name}, montant: $amount FCFA'),
+              'Transaction enregistrée pour ${widget.name}, montant: $finalAmount FCFA'),
           actions: [
             TextButton(
               onPressed: () {
@@ -100,11 +84,7 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-<<<<<<< HEAD
-                    builder: (context) => DashboardPageNoreduce(
-=======
-                    builder: (context) => DashboardPage(
->>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
+                    builder: (context) => SimpleDashboardPage(
                       storeName: widget.storeName,
                       storeLocation: widget.storeLocation,
                       storePhone: widget.storePhone,
@@ -119,7 +99,7 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
         ),
       );
     } catch (e) {
-      print("Erreur lors de l'enregistrement de la transaction: $e");
+      print('Erreur lors de l\'enregistrement de la transaction: $e');
     }
   }
 
@@ -144,13 +124,20 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
             Text('Téléphone du magasin: ${widget.storePhone}',
                 style: TextStyle(fontSize: 18)),
             SizedBox(height: 20),
-            // Text('Notre offre: ${widget.offre}',
-            //     style: TextStyle(fontSize: 18)),
-            // SizedBox(height: 20),
             TextField(
               controller: _amountController,
               decoration: InputDecoration(labelText: 'Entrez le montant'),
               keyboardType: TextInputType.number,
+              onChanged: (_) => _updateAmount(),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Montant initial: ${initialAmount.toStringAsFixed(2)} FCFA',
+              style: TextStyle(fontSize: 18),
+            ),
+            Text(
+              'Montant final: ${finalAmount.toStringAsFixed(2)} FCFA',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Spacer(),
             ElevatedButton(

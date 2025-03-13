@@ -3,6 +3,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'transactionpage.dart';
+import 'transactionreduce.dart';
 
 class ScanQRCodePage extends StatefulWidget {
   final String codeVendeur;
@@ -167,8 +168,17 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
                 Navigator.of(context).pop();
                 _redirectToTransactionPage();
               },
-              child: Text('Continuer la  Transaction'),
+              child: Text('valider la reduction'),
             ),
+
+             SizedBox(width: 10), // Espacement entre les boutons
+    ElevatedButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+        _redirectTodashboardsimple(); // Redirection vers transaction sans réduction
+      },
+      child: Text('Appliquer votre offre'),
+    ),
         ],
       ),
     );
@@ -195,6 +205,22 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
     );
   }
 
+void _redirectTodashboardsimple() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>TransactionNoReducePage(
+          name: name,
+          phone: phone,
+          email: email,
+          codeVendeur: widget.codeVendeur,
+          storeName: storeName,
+          storeLocation: storeLocation,
+          storePhone: storePhone,
+        ),
+      ),
+    );
+  }
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
