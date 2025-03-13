@@ -227,6 +227,23 @@ class _PartnerListPageState extends State<PartnerListPage> {
                                       ),
                                     ],
                                   ),
+
+                                  SizedBox(
+                                      height: 5), // Espacement avant l’offre
+                                  Row(
+                                    children: [
+                                      Icon(Icons.local_offer,
+                                          color: Colors.yellow,
+                                          size: 18), // Icône offre
+                                      SizedBox(width: 5),
+                                      Text(
+                                        partner[
+                                            'offre'], // Assurez-vous que 'offre' est bien dans vos données
+                                        style: TextStyle(
+                                            color: Colors.yellow, fontSize: 14),
+                                      ),
+                                    ],
+                                  ),
                                 ],
                               ),
                               trailing: Icon(Icons.arrow_forward_ios,
@@ -446,6 +463,19 @@ class PartnerDetailsPage extends StatelessWidget {
                     Expanded(
                       child: Text(
                         partnerInfo['localisation'] ?? 'Non spécifiée',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Icon(Icons.local_offer, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        partnerInfo['offre'] ?? 'Non spécifiée',
                         style: TextStyle(fontSize: 16),
                       ),
                     ),

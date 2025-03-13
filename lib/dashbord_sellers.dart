@@ -271,18 +271,18 @@ class DashboardPageState extends State<DashboardPage> {
                                     ],
                                   ),
                                   SizedBox(height: 5),
-                                  Row(
-                                    children: [
-                                      Icon(Icons.discount,
-                                          size: 18, color: Colors.purple),
-                                      SizedBox(width: 5),
-                                      Text(
-                                        'réduction (10%): ${reduction.toStringAsFixed(2)} FCFA',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
+                                  // Row(
+                                  //   children: [
+                                  //     Icon(Icons.discount,
+                                  //         size: 18, color: Colors.purple),
+                                  //     SizedBox(width: 5),
+                                  //     Text(
+                                  //       'réduction (10%): ${reduction.toStringAsFixed(2)} FCFA',
+                                  //       style: TextStyle(
+                                  //           fontWeight: FontWeight.bold),
+                                  //     ),
+                                  //   ],
+                                  // ),
                                   SizedBox(height: 5),
                                   Row(
                                     children: [

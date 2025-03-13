@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'dashbord_sellers.dart';
-import 'dashboardsimple.dart';
 
 class TransactionNoReducePage extends StatefulWidget {
   final String name;
@@ -84,7 +83,7 @@ class _TransactionNoReducePageState extends State<TransactionNoReducePage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SimpleDashboardPage(
+                    builder: (context) => DashboardPage(
                       storeName: widget.storeName,
                       storeLocation: widget.storeLocation,
                       storePhone: widget.storePhone,
@@ -131,12 +130,12 @@ class _TransactionNoReducePageState extends State<TransactionNoReducePage> {
               onChanged: (_) => _updateAmount(),
             ),
             SizedBox(height: 10),
+            // Text(
+            //   'Montant initial: ${initialAmount.toStringAsFixed(2)} FCFA',
+            //   style: TextStyle(fontSize: 18),
+            // ),
             Text(
-              'Montant initial: ${initialAmount.toStringAsFixed(2)} FCFA',
-              style: TextStyle(fontSize: 18),
-            ),
-            Text(
-              'Montant final: ${finalAmount.toStringAsFixed(2)} FCFA',
+              'Montant de la transaction: ${finalAmount.toStringAsFixed(2)} FCFA',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Spacer(),
