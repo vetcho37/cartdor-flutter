@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'transactionpage.dart';
 
-class ScanQRCodePage extends StatefulWidget {
+class ValidateSubscriptionPage extends StatefulWidget {
   final String codeVendeur;
 
-  ScanQRCodePage({required this.codeVendeur});
+  ValidateSubscriptionPage({required this.codeVendeur});
 
   @override
-  _ScanQRCodePageState createState() => _ScanQRCodePageState();
+  _ValidateSubscriptionPageState createState() =>
+      _ValidateSubscriptionPageState();
 }
 
-class _ScanQRCodePageState extends State<ScanQRCodePage> {
-  bool isScannerActive = true;
+class _ValidateSubscriptionPageState extends State<ValidateSubscriptionPage> {
+  final TextEditingController _codeController = TextEditingController();
+  bool isValidating = false;
   late String name;
   late String phone;
   late String email;
@@ -30,48 +31,48 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scan QR Code'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              setState(() {
-                isScannerActive = true; // Réactiver le scanner
-              });
-            },
-          ),
-        ],
+        title: Text('Valider Abonnement'),
       ),
-      body: isScannerActive
-          ? MobileScanner(
-              onDetect: (barcodeCapture) {
-                if (barcodeCapture.barcodes.isNotEmpty) {
-                  final barcode = barcodeCapture.barcodes.first;
-                  if (barcode.rawValue != null) {
-                    String code = barcode.rawValue!;
-                    print('QR Code scanné : $code');
-                    setState(() {
-                      isScannerActive =
-                          false; // Désactiver le scanner après détection
-                    });
-                    _getSubscriptionDetails(code);
-                  } else {
-                    print('Code QR vide ou invalide.');
-                  }
-                }
-              },
-            )
-          : Center(
-              child: Text(
-                'Rafraichissement............',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Entrez le code d\'abonnement:',
+              style: TextStyle(fontSize: 18),
+            ),
+            TextField(
+              controller: _codeController,
+              decoration: InputDecoration(
+                hintText: 'Code d\'abonnement',
+                border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: _validateSubscription,
+                ),
               ),
             ),
+            SizedBox(height: 20),
+            if (isValidating) Center(child: CircularProgressIndicator()),
+          ],
+        ),
+      ),
     );
   }
 
-  Future<void> _getSubscriptionDetails(String uniqueCode) async {
+  Future<void> _validateSubscription() async {
+    String uniqueCode = _codeController.text.trim();
+
+    if (uniqueCode.isEmpty) {
+      _showErrorDialog("Veuillez entrer un code d'abonnement.");
+      return;
+    }
+
+    setState(() {
+      isValidating = true;
+    });
+
     try {
       final subscriptionQuerySnapshot = await FirebaseFirestore.instance
           .collection('subscriptions')
@@ -95,6 +96,10 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
       }
     } catch (e) {
       _showErrorDialog("Erreur: $e");
+    } finally {
+      setState(() {
+        isValidating = false;
+      });
     }
   }
 
@@ -135,11 +140,10 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
             Text('Nom: $name', style: TextStyle(fontSize: 18)),
             Text('Téléphone: $phone', style: TextStyle(fontSize: 18)),
             Text('Email: $email', style: TextStyle(fontSize: 18)),
-            Text(
-                'Date dabonnement: ${DateFormat('dd/MM/yyyy').format(creationDate)}',
+            Text('Créé le: ${DateFormat('dd/MM/yyyy').format(creationDate)}',
                 style: TextStyle(fontSize: 18)),
             Text(
-                'Fin dabonnement: ${DateFormat('dd/MM/yyyy').format(expirationDate)}',
+                'Expire le: ${DateFormat('dd/MM/yyyy').format(expirationDate)}',
                 style: TextStyle(fontSize: 18)),
             Text(
               isActive ? 'Statut: Actif' : 'Statut: Non Actif',
@@ -155,9 +159,6 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              setState(() {
-                isScannerActive = true; // Réactiver le scanner après fermeture
-              });
             },
             child: Text('Fermer'),
           ),
@@ -167,7 +168,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
                 Navigator.of(context).pop();
                 _redirectToTransactionPage();
               },
-              child: Text('Continuer la  Transaction'),
+              child: Text('Continuer vers Transaction'),
             ),
         ],
       ),
@@ -205,9 +206,6 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              setState(() {
-                isScannerActive = true; // Réactiver le scanner après fermeture
-              });
             },
             child: Text('Fermer'),
           ),

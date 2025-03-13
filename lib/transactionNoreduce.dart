@@ -416,7 +416,10 @@ class StatisticsPageState extends State<StatisticsPage> {
                 SizedBox(height: 20),
                 _buildSubscribersTable(codeVendeur),
                 SizedBox(height: 20),
+<<<<<<< HEAD
+=======
                 _buildDailyRevenueTable(codeVendeur),
+>>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
               ],
             ),
           ),

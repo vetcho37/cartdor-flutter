@@ -19,7 +19,6 @@ class TransactionPage extends StatefulWidget {
   final String storeName;
   final String storeLocation;
   final String storePhone;
-  //final String offre;
 
   TransactionPage({
     required this.name,
@@ -33,7 +32,6 @@ class TransactionPage extends StatefulWidget {
     required this.storeName,
     required this.storeLocation,
     required this.storePhone,
-    // required this.offre,
   });
 
   @override
@@ -82,7 +80,6 @@ class _TransactionPageState extends State<TransactionPage> {
         'initialAmount': initialAmount,
         'amount': finalAmount,
         'date': DateTime.now(),
-        //'offre': widget.offre,
       });
 
       // Affichage de la boîte de dialogue de confirmation

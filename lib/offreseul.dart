@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 import 'dashbord_sellers.dart';
+<<<<<<< HEAD
+import 'transactionNoreduce.dart';
+=======
+>>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
 
 class TransactionNoDiscountPage extends StatefulWidget {
   final String name;
@@ -39,7 +43,11 @@ class TransactionNoDiscountPage extends StatefulWidget {
 class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
   final TextEditingController _amountController = TextEditingController();
   String transactionCode = '';
+<<<<<<< HEAD
+  double initialAmount = 0.0; // Montant initial avant réduction
+=======
   //double initialAmount = 0.0; // Montant initial avant réduction
+>>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
 
   @override
   void initState() {
@@ -66,9 +74,14 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
         'storeName': widget.storeName,
         'storeLocation': widget.storeLocation,
         'storePhone': widget.storePhone,
+<<<<<<< HEAD
+        'initialAmount': amount,
+        'amount': amount,
+=======
         //'initialAmount': amount,
         'amount': amount,
         //'offre': widget.offre,
+>>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
         'date': DateTime.now(),
         'isDiscountApplied':
             false, // Indique que la réduction n'a pas été appliquée
@@ -87,7 +100,11 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
+<<<<<<< HEAD
+                    builder: (context) => DashboardPageNoreduce(
+=======
                     builder: (context) => DashboardPage(
+>>>>>>> 2b49175abdef23a807fb59dcf5322879379a7dff
                       storeName: widget.storeName,
                       storeLocation: widget.storeLocation,
                       storePhone: widget.storePhone,
