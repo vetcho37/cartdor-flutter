@@ -15,7 +15,7 @@ class TransactionNoDiscountPage extends StatefulWidget {
   final String storeName;
   final String storeLocation;
   final String storePhone;
-  final String offre;
+ // final String offre;
 
   TransactionNoDiscountPage({
     required this.name,
@@ -28,7 +28,7 @@ class TransactionNoDiscountPage extends StatefulWidget {
     required this.storeName,
     required this.storeLocation,
     required this.storePhone,
-    required this.offre,
+    //required this.offre,
   });
 
   @override
@@ -68,7 +68,7 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
         'storePhone': widget.storePhone,
         'initialAmount': amount,
         'amount': amount,
-        'offre': widget.offre,
+        //'offre': widget.offre,
         'date': DateTime.now(),
         'isDiscountApplied':
             false, // Indique que la réduction n'a pas été appliquée
@@ -127,9 +127,9 @@ class _TransactionNoDiscountPageState extends State<TransactionNoDiscountPage> {
             Text('Téléphone du magasin: ${widget.storePhone}',
                 style: TextStyle(fontSize: 18)),
             SizedBox(height: 20),
-            Text('Notre offre: ${widget.offre}',
-                style: TextStyle(fontSize: 18)),
-            SizedBox(height: 20),
+            // Text('Notre offre: ${widget.offre}',
+            //     style: TextStyle(fontSize: 18)),
+            // SizedBox(height: 20),
             TextField(
               controller: _amountController,
               decoration: InputDecoration(labelText: 'Entrez le montant'),

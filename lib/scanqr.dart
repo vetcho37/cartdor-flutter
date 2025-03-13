@@ -200,7 +200,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
-          offre: offre,
+         // offre: offre,
         ),
       ),
     );
@@ -221,7 +221,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
-          offre: offre,
+          //offre: offre,
         ),
       ),
     );
