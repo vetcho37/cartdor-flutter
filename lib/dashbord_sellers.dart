@@ -725,68 +725,68 @@ class StatisticsPageState extends State<StatisticsPage> {
     );
   }
 
-  // Widget _buildDailyRevenueTable(String codeVendeur) {
-  //   return Card(
-  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-  //     elevation: 8,
-  //     color: Colors.orange[50],
-  //     child: Padding(
-  //       padding: const EdgeInsets.all(16.0),
-  //       child: Column(
-  //         crossAxisAlignment: CrossAxisAlignment.start,
-  //         children: [
-  //           Text(
-  //             'Recettes Journalières',
-  //             style: TextStyle(
-  //                 fontSize: 22,
-  //                 fontWeight: FontWeight.bold,
-  //                 color: Colors.orange),
-  //           ),
-  //           SizedBox(height: 10),
-  //           StreamBuilder<QuerySnapshot>(
-  //             stream: FirebaseFirestore.instance
-  //                 .collection('transactions')
-  //                 .where('codeVendeur',
-  //                     isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
-  //                 .snapshots(),
-  //             builder: (context, snapshot) {
-  //               if (snapshot.connectionState == ConnectionState.waiting) {
-  //                 return Center(child: CircularProgressIndicator());
-  //               }
+  Widget _buildDailyRevenueTable(String codeVendeur) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      elevation: 8,
+      color: Colors.orange[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Recettes Journalières',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange),
+            ),
+            SizedBox(height: 10),
+            StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('transactions')
+                  .where('codeVendeur',
+                      isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-  //               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-  //                 return Center(child: Text('Aucune donnée de recettes.'));
-  //               }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('Aucune donnée de recettes.'));
+                }
 
-  //               // Code pour afficher les recettes journalières
-  //               return SingleChildScrollView(
-  //                 scrollDirection: Axis.horizontal,
-  //                 child: DataTable(
-  //                   columns: [
-  //                     DataColumn(
-  //                         label: Text('Date',
-  //                             style: TextStyle(fontWeight: FontWeight.bold))),
-  //                     DataColumn(
-  //                         label: Text('CA',
-  //                             style: TextStyle(fontWeight: FontWeight.bold))),
-  //                   ],
-  //                   rows: [
-  //                     DataRow(cells: [
-  //                       DataCell(Text('01/02/2025')),
-  //                       DataCell(Text('1,200,000 FCFA')),
-  //                     ]),
-  //                     DataRow(cells: [
-  //                       DataCell(Text('02/02/2025')),
-  //                       DataCell(Text('1,300,000 FCFA')),
-  //                     ]),
-  //                   ],
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
+                // Code pour afficher les recettes journalières
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DataTable(
+                    columns: [
+                      DataColumn(
+                          label: Text('Date',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                      DataColumn(
+                          label: Text('CA',
+                              style: TextStyle(fontWeight: FontWeight.bold))),
+                    ],
+                    rows: [
+                      DataRow(cells: [
+                        DataCell(Text('01/02/2025')),
+                        DataCell(Text('1,200,000 FCFA')),
+                      ]),
+                      DataRow(cells: [
+                        DataCell(Text('02/02/2025')),
+                        DataCell(Text('1,300,000 FCFA')),
+                      ]),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
