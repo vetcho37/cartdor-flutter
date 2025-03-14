@@ -195,7 +195,9 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
             double totalEconomies = 0.0;
             for (var transaction in transactions) {
               double amount = transaction['initialAmount'].toDouble();
-              double economy = amount * 0.10; // Exemple avec 5% de réduction
+              double montantPaye = transaction['amount'].toDouble();
+              double economy = amount - montantPaye;
+              // Exemple avec 5% de réduction
               totalEconomies += economy;
             }
 
@@ -279,8 +281,9 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
                             children: transactions.map((transaction) {
                               double initialAmount =
                                   transaction['initialAmount'].toDouble();
+                              double amount = transaction['amount'].toDouble();
                               double economy =
-                                  initialAmount * 0.10; // Exemple avec 5%
+                                  initialAmount - amount; // Exemple avec 5%
 
                               // Convertir la date de Timestamp à DateTime
                               Timestamp timestamp = transaction['date'];
@@ -328,6 +331,18 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
                                                 TextStyle(color: Colors.black),
                                           ),
                                         ],
+                                      ),
+
+                                      // Ajout de l'information "offre"
+                                      SizedBox(
+                                          height:
+                                              4), // Espacement entre la date et l'offre
+                                      Text(
+                                        'Offre: ${transaction['offre'] ?? 'Non spécifié'}',
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -495,6 +510,7 @@ class _Menu_AccueilState extends State<Menu_Accueil> {
           'date': doc['date'], // Timestamp
           'amount': doc['amount'],
           'initialAmount': doc['initialAmount'],
+          'offre': doc['offre'],
         };
       }).toList();
     } catch (e) {
@@ -535,13 +551,15 @@ class TransactionDetailPage extends StatelessWidget {
             SizedBox(height: 8),
             Text('Date: $formattedDate'),
             SizedBox(height: 8),
-            Text('Montant initial: ${transaction['initialAmount']}'),
+            Text('Montant facture: ${transaction['initialAmount']}'),
             SizedBox(height: 8),
             Text(
-                'Montant après réduction: ${(transaction['initialAmount'] * 0.9).toStringAsFixed(2)} FCFA'),
+                'Montant paye: ${(transaction['amount']).toStringAsFixed(2)} FCFA'),
             SizedBox(height: 8),
             Text(
-                'Economie: ${(transaction['initialAmount'] - (transaction['initialAmount'] * 0.9)).toStringAsFixed(2)}'),
+                'Economie: ${(transaction['initialAmount'] - (transaction['amount'])).toStringAsFixed(2)}'),
+            SizedBox(height: 10),
+            Text('offre: ${transaction['offre']}'),
           ],
         ),
       ),

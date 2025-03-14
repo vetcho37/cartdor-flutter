@@ -83,8 +83,9 @@ class DashboardUserPageState extends State<DashboardUserPage> {
 
     for (var transaction in transactions) {
       double montantInitial = transaction['initialAmount'].toDouble();
-      double montantPaye =
-          montantInitial * 0.9; // Montant payé après réduction de 10%
+      // double montantPaye =
+      //     montantInitial * 0.9; // Montant payé après réduction de 10%
+      double montantPaye = transaction['amount'].toDouble();
       double economie = montantInitial - montantPaye; // Économie réalisée
 
       montantInitialTotal += montantInitial;
@@ -247,6 +248,25 @@ class DashboardUserPageState extends State<DashboardUserPage> {
                                         ),
                                       ],
                                     ),
+
+                                    SizedBox(height: 10),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.local_offer,
+                                            size: 20,
+                                            color: Colors.lightGreenAccent),
+                                        SizedBox(width: 5),
+                                        Expanded(
+                                          child: Text(
+                                            'Offre: ${transaction['offre']}',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.blue),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                     SizedBox(height: 5),
                                     Row(
                                       children: [
@@ -282,8 +302,9 @@ class DashboardUserPageState extends State<DashboardUserPage> {
                                             size: 20, color: Colors.green),
                                         SizedBox(width: 5),
                                         Text(
-                                          'Montant Payé(10% reduction):${transaction['amount']}',
-                                          style: TextStyle(fontSize: 16),
+                                          'Montant Payé:${transaction['amount']}',
+                                          style: TextStyle(
+                                              fontSize: 16, color: Colors.red),
                                         ),
                                       ],
                                     ),

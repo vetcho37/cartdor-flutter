@@ -574,7 +574,8 @@ class StatisticsPageState extends State<StatisticsPage> {
                 transactions.forEach((transaction) {
                   final data = transaction.data() as Map<String, dynamic>;
                   final initialAmount = data['initialAmount'] ?? 0.0;
-                  final reduction = initialAmount * 0.10;
+                  final amount = data['amount'] ?? 0.0;
+                  final reduction = initialAmount - amount;
                   final netCA = initialAmount - reduction;
 
                   totalCA += initialAmount;
@@ -672,11 +673,10 @@ class StatisticsPageState extends State<StatisticsPage> {
                 for (var doc in snapshot.data!.docs) {
                   final data = doc.data() as Map<String, dynamic>;
                   String subscriberName = data['name'] ?? 'Inconnu';
-                  double initialAmount =
-                      (data['initialAmount'] ?? 0.0).toDouble();
-                  if (initialAmount <= 0) continue;
+                  double amount = (data['amount'] ?? 0.0).toDouble();
+                  if (amount <= 0) continue;
 
-                  double netCA = initialAmount * 0.90;
+                  double netCA = amount;
 
                   if (subscribers.containsKey(subscriberName)) {
                     subscribers[subscriberName]!['transactions'] += 1;
@@ -747,8 +747,9 @@ class StatisticsPageState extends State<StatisticsPage> {
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('transactions')
-                  .where('codeVendeur',
-                      isEqualTo: codeVendeur) // Utilisation de codeVendeur ici
+                  .where('codeVendeur', isEqualTo: codeVendeur)
+                  .orderBy('date',
+                      descending: true) // Trie par date décroissante
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -759,7 +760,32 @@ class StatisticsPageState extends State<StatisticsPage> {
                   return Center(child: Text('Aucune donnée de recettes.'));
                 }
 
-                // Code pour afficher les recettes journalières
+                // Regroupement des transactions par date et calcul du CA journalier
+                Map<String, double> dailyRevenue = {};
+
+                for (var doc in snapshot.data!.docs) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  DateTime date = (data['date'] as Timestamp).toDate();
+                  String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+                  double amount = (data['amount'] ?? 0).toDouble();
+
+                  if (dailyRevenue.containsKey(formattedDate)) {
+                    dailyRevenue[formattedDate] =
+                        dailyRevenue[formattedDate]! + amount;
+                  } else {
+                    dailyRevenue[formattedDate] = amount;
+                  }
+                }
+
+                // Création des lignes du tableau
+                List<DataRow> rows = dailyRevenue.entries.map((entry) {
+                  return DataRow(cells: [
+                    DataCell(Text(entry.key)), // Date formatée
+                    DataCell(Text(
+                        '${entry.value.toStringAsFixed(2)} FCFA')), // CA du jour
+                  ]);
+                }).toList();
+
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: DataTable(
@@ -771,16 +797,7 @@ class StatisticsPageState extends State<StatisticsPage> {
                           label: Text('CA',
                               style: TextStyle(fontWeight: FontWeight.bold))),
                     ],
-                    rows: [
-                      DataRow(cells: [
-                        DataCell(Text('01/02/2025')),
-                        DataCell(Text('1,200,000 FCFA')),
-                      ]),
-                      DataRow(cells: [
-                        DataCell(Text('02/02/2025')),
-                        DataCell(Text('1,300,000 FCFA')),
-                      ]),
-                    ],
+                    rows: rows,
                   ),
                 );
               },
