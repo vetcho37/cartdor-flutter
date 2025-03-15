@@ -26,6 +26,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
   late String storeName;
   late String storeLocation;
   late String storePhone;
+  late String offre;
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +113,12 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
         storeName = storeData['nom_magasin'] ?? 'Non renseigné';
         storeLocation = storeData['localisation'] ?? 'Non renseignée';
         storePhone = storeData['telephone'] ?? 'Non renseigné';
+        offre = storeData['offre'] ?? 'Non renseigné';
       } else {
         storeName = 'Inconnu';
         storeLocation = 'Non renseignée';
         storePhone = 'Non renseigné';
+        offre = 'Non renseigné';
       }
     } catch (e) {
       print('Erreur lors de la récupération des informations du magasin: $e');
@@ -171,14 +174,14 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
               child: Text('valider la reduction'),
             ),
 
-             SizedBox(width: 10), // Espacement entre les boutons
-    ElevatedButton(
-      onPressed: () {
-        Navigator.of(context).pop();
-        _redirectTodashboardsimple(); // Redirection vers transaction sans réduction
-      },
-      child: Text('Appliquer votre offre'),
-    ),
+          SizedBox(width: 10), // Espacement entre les boutons
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _redirectTodashboardsimple(); // Redirection vers transaction sans réduction
+            },
+            child: Text('Appliquer votre offre'),
+          ),
         ],
       ),
     );
@@ -205,11 +208,11 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
     );
   }
 
-void _redirectTodashboardsimple() {
+  void _redirectTodashboardsimple() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) =>TransactionNoReducePage(
+        builder: (context) => TransactionNoReducePage(
           name: name,
           phone: phone,
           email: email,
@@ -217,10 +220,12 @@ void _redirectTodashboardsimple() {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
+          offre: offre,
         ),
       ),
     );
   }
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,

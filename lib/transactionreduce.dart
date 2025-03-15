@@ -12,16 +12,17 @@ class TransactionNoReducePage extends StatefulWidget {
   final String storeName;
   final String storeLocation;
   final String storePhone;
+  final String offre;
 
-  TransactionNoReducePage({
-    required this.name,
-    required this.phone,
-    required this.email,
-    required this.codeVendeur,
-    required this.storeName,
-    required this.storeLocation,
-    required this.storePhone,
-  });
+  TransactionNoReducePage(
+      {required this.name,
+      required this.phone,
+      required this.email,
+      required this.codeVendeur,
+      required this.storeName,
+      required this.storeLocation,
+      required this.storePhone,
+      required this.offre});
 
   @override
   _TransactionNoReducePageState createState() =>
@@ -63,6 +64,7 @@ class _TransactionNoReducePageState extends State<TransactionNoReducePage> {
         'email': widget.email,
         'codeVendeur': widget.codeVendeur,
         'storeName': widget.storeName,
+        'offre': widget.offre,
         'storeLocation': widget.storeLocation,
         'storePhone': widget.storePhone,
         'initialAmount': initialAmount,
@@ -123,6 +125,7 @@ class _TransactionNoReducePageState extends State<TransactionNoReducePage> {
             Text('Téléphone du magasin: ${widget.storePhone}',
                 style: TextStyle(fontSize: 18)),
             SizedBox(height: 20),
+            Text('offre: ${widget.offre}', style: TextStyle(fontSize: 18)),
             TextField(
               controller: _amountController,
               decoration: InputDecoration(labelText: 'Entrez le montant'),
