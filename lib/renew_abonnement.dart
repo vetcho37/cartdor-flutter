@@ -126,7 +126,7 @@ class _PaymentPageState extends State<MyApp_renew> {
       final transactionId = Random().nextInt(10000000).toString();
       currentTransactionId = transactionId;
 
-      final amount = 100;
+      final amount = 2000;
 
       addLog("Initialisation du paiement pour la transaction: $transactionId");
 
@@ -516,7 +516,7 @@ class _PaymentPageState extends State<MyApp_renew> {
                                           ),
                                           SizedBox(height: 4),
                                           Text(
-                                            "100 XOF",
+                                            "2000 XOF",
                                             style: TextStyle(
                                               color: Colors.blue.shade800,
                                               fontWeight: FontWeight.bold,
