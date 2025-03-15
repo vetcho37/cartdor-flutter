@@ -171,7 +171,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
                 Navigator.of(context).pop();
                 _redirectToTransactionPage();
               },
-              child: Text('valider la reduction'),
+              child: Text('valider la reduction de 10%'),
             ),
 
           SizedBox(width: 10), // Espacement entre les boutons
@@ -180,7 +180,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
               Navigator.of(context).pop();
               _redirectTodashboardsimple(); // Redirection vers transaction sans réduction
             },
-            child: Text('Appliquer votre offre'),
+            child: Text('valider votre offre'),
           ),
         ],
       ),
@@ -203,6 +203,7 @@ class _ScanQRCodePageState extends State<ScanQRCodePage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
+          offre: offre,
         ),
       ),
     );

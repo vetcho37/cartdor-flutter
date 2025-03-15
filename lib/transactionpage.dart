@@ -19,6 +19,7 @@ class TransactionPage extends StatefulWidget {
   final String storeName;
   final String storeLocation;
   final String storePhone;
+  final String offre;
 
   TransactionPage({
     required this.name,
@@ -32,6 +33,7 @@ class TransactionPage extends StatefulWidget {
     required this.storeName,
     required this.storeLocation,
     required this.storePhone,
+    required this.offre,
   });
 
   @override
@@ -77,6 +79,7 @@ class _TransactionPageState extends State<TransactionPage> {
         'storeName': widget.storeName,
         'storeLocation': widget.storeLocation,
         'storePhone': widget.storePhone,
+        'offre': widget.offre,
         'initialAmount': initialAmount,
         'amount': finalAmount,
         'date': DateTime.now(),
@@ -138,7 +141,8 @@ class _TransactionPageState extends State<TransactionPage> {
                 style: TextStyle(fontSize: 18)),
             Text('Téléphone du magasin: ${widget.storePhone}',
                 style: TextStyle(fontSize: 18)),
-            SizedBox(height: 20),
+            SizedBox(height: 18),
+            Text('offre: ${widget.offre}', style: TextStyle(fontSize: 18)),
             TextField(
               controller: _amountController,
               decoration: InputDecoration(labelText: 'Entrez le montant'),
@@ -147,7 +151,7 @@ class _TransactionPageState extends State<TransactionPage> {
             ),
             SizedBox(height: 10),
             Text(
-              'Montant après réduction: ${finalAmount.toStringAsFixed(2)} FCFA',
+              'Montant après réduction(10%): ${finalAmount.toStringAsFixed(2)} FCFA',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             Spacer(),

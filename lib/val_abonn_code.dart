@@ -26,6 +26,7 @@ class _ValidateSubscriptionPageState extends State<ValidateSubscriptionPage> {
   late String storeName;
   late String storeLocation;
   late String storePhone;
+  late String offre;
 
   @override
   Widget build(BuildContext context) {
@@ -191,6 +192,7 @@ class _ValidateSubscriptionPageState extends State<ValidateSubscriptionPage> {
           storeName: storeName,
           storeLocation: storeLocation,
           storePhone: storePhone,
+          offre: offre,
         ),
       ),
     );
