@@ -24,6 +24,7 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
   final _localisationController = TextEditingController();
   final _nomMagasinController = TextEditingController();
   final _telephoneController = TextEditingController();
+  final _offreController = TextEditingController();
 
   String? selectedCategory; // Variable pour stocker la catégorie sélectionnée
   List<String> categories = [
@@ -102,7 +103,9 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
         'localisation': _localisationController.text,
         'nom_magasin': _nomMagasinController.text,
         'telephone': _telephoneController.text,
-        'categories': selectedCategory, // Enregistrer la catégorie sélectionnée
+        'categories': selectedCategory,
+        'offre': _offreController.text,
+        // Enregistrer la catégorie sélectionnée
       });
 
       await _generateQrCode(code); // Générer le QR code localement
@@ -171,6 +174,13 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
                   TextField(
                     controller: _descriptionController,
                     decoration: InputDecoration(labelText: 'Description'),
+                    maxLines: 3,
+                  ),
+
+                  SizedBox(height: 10),
+                  TextField(
+                    controller: _offreController,
+                    decoration: InputDecoration(labelText: 'Offre'),
                     maxLines: 3,
                   ),
                   SizedBox(height: 10),

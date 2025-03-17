@@ -9,12 +9,12 @@ import 'menu_accueil.dart';
 import 'statutabonement.dart';
 import 'index.dart';
 
-class PartnerListPage extends StatefulWidget {
+class PartnerListPagehome extends StatefulWidget {
   @override
   _PartnerListPageState createState() => _PartnerListPageState();
 }
 
-class _PartnerListPageState extends State<PartnerListPage> {
+class _PartnerListPageState extends State<PartnerListPagehome> {
   TextEditingController searchController = TextEditingController();
   String searchQuery = '';
   String selectedCategory =
@@ -36,7 +36,7 @@ class _PartnerListPageState extends State<PartnerListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Partenaires",
+          "Bienvenue chez CARTD'OR",
           style: TextStyle(
               fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
@@ -74,7 +74,7 @@ class _PartnerListPageState extends State<PartnerListPage> {
                 child: TextField(
                   controller: searchController,
                   decoration: InputDecoration(
-                    hintText: 'partenaire, ville',
+                    hintText: 'Nos partenaires, ville',
                     prefixIcon: Icon(Icons.search, color: Colors.blue),
                     filled: true,
                     fillColor: Colors.grey.shade200,
@@ -285,96 +285,6 @@ class _PartnerListPageState extends State<PartnerListPage> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: Container(
-        color: Colors.white,
-        padding: EdgeInsets.symmetric(vertical: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildMenuItem(
-              context,
-              icon: Icons.dashboard,
-              title: 'Historiques',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DashboardUserPage(),
-                  ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              icon: Icons.home, // Icône d'accueil
-              title: 'Accueil',
-              onTap: () {
-                // Réinitialiser la page
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      // Récupérer l'email de l'utilisateur actuel
-                      User? user = FirebaseAuth.instance.currentUser;
-                      String userEmail = user?.email ??
-                          ''; // Par défaut, une chaîne vide si l'email est null
-
-                      return Menu_Accueil(userEmail: userEmail);
-                    },
-                  ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              icon: Icons.people,
-              title: 'Partenaires',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PartnerListPage(),
-                  ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context,
-              icon: Icons.subscriptions,
-              title: 'Abonnez vous',
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SubscriptionStatusScreen(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMenuItem(BuildContext context,
-      {required IconData icon,
-      required String title,
-      required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 28, color: Colors.blue),
-          SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(fontSize: 12, color: Colors.blue[900]),
-            textAlign: TextAlign.center,
-          ),
-        ],
       ),
     );
   }

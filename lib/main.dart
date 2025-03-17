@@ -2,6 +2,7 @@ import 'package:cartdor/dashbord_abonne.dart';
 import 'package:cartdor/dashbord_users.dart';
 import 'package:cartdor/menu_accueil.dart';
 import 'package:cartdor/menu_demarage.dart';
+import 'package:cartdor/pagehome.dart';
 import 'package:cartdor/register.dart';
 import 'package:cartdor/subscription_cinetpay.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ import 'admin_page.dart';
 import 'nbre_abonne_mois.dart';
 import 'dart:io'; // Pour accéder à Platform.environment
 import 'package:flutter/widgets.dart';
+import 'homepage.dart';
 
 void main() async {
   // Initialisation du framework Flutter
@@ -50,13 +52,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "CARTD'OR",
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      debugShowCheckedModeBanner: false, // Supprime le bandeau de débogage
-      home:
-          LoginPage(), // Page d'accueil ou toute autre page que tu veux utiliser comme page principale
-    );
+        title: "CARTD'OR",
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        debugShowCheckedModeBanner: false, // Supprime le bandeau de débogage
+        home:
+            //LoginPage(), // Page d'accueil ou toute autre page que tu veux utiliser comme page principale
+            PartnerListPagehome());
   }
 }

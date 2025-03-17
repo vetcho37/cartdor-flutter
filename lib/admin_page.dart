@@ -377,6 +377,7 @@ class _PartnersPageState extends State<PartnersPage> {
                 Text('categories: ${partner['categories'] ?? 'Non définie'}'),
                 Text('Matricule: ${partner['code_vendeur'] ?? 'Non définie'}'),
                 Text('Description: ${partner['description'] ?? 'Non définie'}'),
+                Text('offre: ${partner['offre'] ?? 'Non définie'}'),
                 Text(
                     'Date d\'inscription: ${partner['createdAt']?.toDate().toString() ?? 'Non définie'}'),
               ],
@@ -466,7 +467,7 @@ class _PartnersPageState extends State<PartnersPage> {
                       child: ListTile(
                         title: Text(partner['nom_magasin'] ?? 'Nom non défini'),
                         subtitle: Text(
-                          'Email: ${partner['email'] ?? 'Non défini'}',
+                          'Contact: ${partner['telephone'] ?? 'Non défini'}',
                         ),
                         trailing: Icon(Icons.arrow_forward),
                         onTap: () {
@@ -502,6 +503,7 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
   final _localisationController = TextEditingController();
   final _nomMagasinController = TextEditingController();
   final _telephoneController = TextEditingController();
+  final _offreController = TextEditingController();
 
   String? selectedCategory; // Variable pour stocker la catégorie sélectionnée
   List<String> categories = [
@@ -540,7 +542,8 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
         'localisation': _localisationController.text,
         'nom_magasin': _nomMagasinController.text,
         'telephone': _telephoneController.text,
-        'categories': selectedCategory, // Enregistrer la catégorie sélectionnée
+        'categories': selectedCategory,
+        'offre': _offreController.text, // Enregistrer la catégorie sélectionnée
       });
 
       setState(() {
@@ -620,6 +623,7 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
                   TextField(
                     controller: _localisationController,
                     decoration: InputDecoration(labelText: 'Localisation'),
+                    maxLines: 3,
                   ),
                   SizedBox(height: 10),
                   TextField(
@@ -642,6 +646,13 @@ class _PartnerRegistrationPageState extends State<PartnerRegistrationPage> {
                   TextField(
                     controller: _descriptionController,
                     decoration: InputDecoration(labelText: 'Description'),
+                    maxLines: 3,
+                  ),
+                  SizedBox(height: 10),
+
+                  TextField(
+                    controller: _offreController,
+                    decoration: InputDecoration(labelText: 'Offre'),
                     maxLines: 3,
                   ),
                   SizedBox(height: 10),
