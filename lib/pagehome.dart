@@ -36,7 +36,7 @@ class _PartnerListPageState extends State<PartnerListPagehome> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Bienvenue chez CARTD'OR",
+          "CARTD'OR",
           style: TextStyle(
               fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
         ),
