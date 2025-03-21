@@ -129,7 +129,7 @@ class _PaymentPageState extends State<MyApp_cinet> {
       final transactionId = Random().nextInt(10000000).toString();
       currentTransactionId = transactionId;
 
-      final amount = 2000;
+      final amount = 100;
 
       addLog("Initialisation du paiement pour la transaction: $transactionId");
 
@@ -499,7 +499,7 @@ class _PaymentPageState extends State<MyApp_cinet> {
                                           ),
                                           SizedBox(height: 4),
                                           Text(
-                                            "2000 XOF",
+                                            "100 XOF",
                                             style: TextStyle(
                                               color: Colors.blue.shade800,
                                               fontWeight: FontWeight.bold,
